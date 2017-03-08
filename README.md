@@ -102,7 +102,7 @@ k8s_apiserver_cert_hosts:
   - kubernetes.default.svc
   - kubernetes.default.svc.cluster.local
 ```
-Add all your Kubernetes controller, worker and 127.0.0.1 here. As with the etcd hosts I recommend to add the hostname, the fully qualified domain names (FQDN) and the IP addresses of your API server hosts. If you know that you will add more worker later also and them here to save you work later.
+Add all your Kubernetes controller, worker and 127.0.0.1 here. As with the etcd hosts I recommend to add the hostname, the fully qualified domain names (FQDN) and the IP address for every API server hosts. If you know that you will add more worker later add them here in advance to save you work later.
 
 Example Playbook
 ----------------
