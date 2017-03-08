@@ -1,0 +1,69 @@
+---
+cfssl_conf_directory: /etc/cfssl
+cfssl_certificate_owner: root
+cfssl_certificate_group: root
+
+# Expiry for etcd root certificate
+ca_etcd_expiry: 87600h
+
+# Certificate authority for etcd certificates
+ca_etcd_csr_cn: Etcd
+ca_etcd_csr_key_algo: ecdsa
+ca_etcd_csr_key_size: 384
+ca_etcd_csr_names_c: DE
+ca_etcd_csr_names_l: The_Internet
+ca_etcd_csr_names_o: Kubernetes
+ca_etcd_csr_names_ou: BY
+ca_etcd_csr_names_st: Bayern
+
+# Expiry for Kubernetes API server root certificates
+ca_k8s_apiserver_expiry: 87600h
+
+# Certificate authority for Kubernetes API server
+ca_k8s_apiserver_csr_cn: Kubernetes
+ca_k8s_apiserver_csr_key_algo: ecdsa
+ca_k8s_apiserver_csr_key_size: 384
+ca_k8s_apiserver_csr_names_c: DE
+ca_k8s_apiserver_csr_names_l: The_Internet
+ca_k8s_apiserver_csr_names_o: Kubernetes
+ca_k8s_apiserver_csr_names_ou: BY
+ca_k8s_apiserver_csr_names_st: Bayern
+
+# CSR parameter for etcd certificate
+etcd_csr_cn: Etcd
+etcd_csr_key_algo: ecdsa
+etcd_csr_key_size: 384
+etcd_csr_names_c: DE
+etcd_csr_names_l: The_Internet
+etcd_csr_names_o: Kubernetes
+etcd_csr_names_ou: BY
+etcd_csr_names_st: Bayern
+
+# CSR parameter for Kubernetes API server certificate
+k8s_apiserver_csr_cn: Kubernetes
+k8s_apiserver_csr_key_algo: ecdsa
+k8s_apiserver_csr_key_size: 384
+k8s_apiserver_csr_names_c: DE
+k8s_apiserver_csr_names_l: The_Internet
+k8s_apiserver_csr_names_o: Kubernetes
+k8s_apiserver_csr_names_ou: BY
+k8s_apiserver_csr_names_st: Bayern
+
+etcd_cert_hosts:
+  - 127.0.0.1
+  - etcd0
+  - etcd1
+  - etcd2
+
+k8s_apiserver_cert_hosts:
+  - 127.0.0.1
+  - controller0
+  - controller1
+  - controller2
+  - worker0
+  - worker1
+  - worker2
+  - kubernetes
+  - kubernetes.default
+  - kubernetes.default.svc
+  - kubernetes.default.svc.cluster.local
