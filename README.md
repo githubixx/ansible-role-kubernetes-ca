@@ -6,7 +6,7 @@ This playbook is used in [Kubernetes the not so hard way with Ansible (at scalew
 Requirements
 ------------
 
-This playbook needs [CFSSL](https://github.com/cloudflare/cfssl) PKI toolkit binaries installed. You can use [ansible-role-cfssl](https://github.com/githubixx/ansible-role-cfssl) to install CFSSL locally on your machine. If you want to store the generarted certifcates and CA's locally or on a network share specify the role variables below in `host_vars/localhost`.
+This playbook needs [CFSSL](https://github.com/cloudflare/cfssl) PKI toolkit binaries installed. You can use [ansible-role-cfssl](https://github.com/githubixx/ansible-role-cfssl) to install CFSSL locally on your machine. If you want to store the generated certificates and CA's locally or on a network share specify the role variables below in `host_vars/localhost`.
 
 Role Variables
 --------------
@@ -102,7 +102,7 @@ k8s_apiserver_cert_hosts:
   - kubernetes.default.svc
   - kubernetes.default.svc.cluster.local
 ```
-Add all your Kubernetes controller, worker and 127.0.0.1 here. As with the etcd hosts I recommend to add the hostname, the fully qualified domain names (FQDN) and the IP address for every API server hosts. If you know that you will add more worker later add them here in advance to save you work later.
+Add all your Kubernetes controller, worker and 127.0.0.1 here. As with the etcd hosts I recommend to add the hostname, the fully qualified domain names (FQDN) and the IP address for every API server host. If you know that you will add more worker later add them here in advance to save you work later.
 
 Example Playbook
 ----------------
