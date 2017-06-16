@@ -57,6 +57,7 @@ etcd_cert_hosts:
 
 k8s_apiserver_cert_hosts:
   - 127.0.0.1
+  - 10.32.0.1
   - controller0
   - controller1
   - controller2

@@ -91,6 +91,7 @@ Here you add all etcd hosts. I recommend to add the hostname, the fully qualifie
 ```
 k8s_apiserver_cert_hosts:
   - 127.0.0.1
+  - 10.32.0.1
   - controller0
   - controller1
   - controller2
@@ -102,7 +103,7 @@ k8s_apiserver_cert_hosts:
   - kubernetes.default.svc
   - kubernetes.default.svc.cluster.local
 ```
-Add all your Kubernetes controller, worker and 127.0.0.1 here. As with the etcd hosts I recommend to add the hostname, the fully qualified domain names (FQDN) and the IP address for every API server host. If you know that you will add more worker later add them here in advance to save you work later.
+Add all your Kubernetes controller, worker, 10.32.0.1 and 127.0.0.1 here. 10.32.0.1 is the internal virtual IP of the Kubernetes API. If you don't add it in this list KubeDNS later won't work. As with the etcd hosts I recommend to add the hostname, the fully qualified domain names (FQDN) and the IP address for every API server host. If you know that you will add more worker later add them here in advance to save you work later.
 
 Example Playbook
 ----------------
