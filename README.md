@@ -108,7 +108,7 @@ Example Playbook
 ----------------
 
 ```
-- hosts: k8s-ca
+- hosts: k8s_ca
 
   roles:
     - githubixx.kubernetes-ca
