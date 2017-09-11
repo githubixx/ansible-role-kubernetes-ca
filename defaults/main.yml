@@ -1,7 +1,7 @@
 ---
-cfssl_conf_directory: /etc/cfssl
-cfssl_certificate_owner: root
-cfssl_certificate_group: root
+k8s_ca_conf_directory: /etc/cfssl
+k8s_ca_certificate_owner: root
+k8s_ca_certificate_group: root
 
 # Expiry for etcd root certificate
 ca_etcd_expiry: 87600h

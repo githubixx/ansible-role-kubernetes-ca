@@ -3,6 +3,19 @@ ansible-role-kubernetes-ca
 
 This role is used in [Kubernetes the not so hard way with Ansible (at scaleway) - Part 4 - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-at-scaleway-part-4/). It basically creates two CA's (one for etcd and one for Kubernetes API server) and the certificates needed to secure communication of the Kubernetes components. Besides the Kubernetes API server none of the Kubernetes components should communicate with the etcd cluster directly. For more information see [Kubernetes the not so hard way with Ansible (at scaleway) - Part 4 - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-at-scaleway-part-4/).
 
+Versions
+--------
+
+I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too.
+
+* v2.0.0
+
+- renamed `cfssl_*` variables to `k8s_ca_*`
+
+* v1.0.0
+
+- Initial Ansible role.
+
 Requirements
 ------------
 
@@ -14,17 +27,17 @@ Role Variables
 This playbook has quite a few variables. But that's mainly information needed for the certificates.
 
 ```
-cfssl_conf_directory: /etc/cfssl
-cfssl_certificate_owner: root
-cfssl_certificate_group: root
+k8s_ca_conf_directory: /etc/cfssl
+k8s_ca_certificate_owner: root
+k8s_ca_certificate_group: root
 ```
 
-`cfssl_conf_directory` tells Ansible where to store the CA's and certificate files. To enable Ansible to read the files in later runs you should specify a user and group in `cfssl_certificate_owner` / `cfssl_certificate_group` which has permissions (in most cases this will be the user you use on your workstation).
+`k8s_ca_conf_directory` tells Ansible where to store the CA's and certificate files. To enable Ansible to read the files in later runs you should specify a user and group in `k8s_ca_certificate_owner` / `k8s_ca_certificate_group` which has permissions (in most cases this will be the user you use on your workstation).
 
 ```
 ca_etcd_expiry: 87600h
 ```
-`cfssl_certificate_group` sets the expiry date for etcd root CA.
+`ca_etcd_expiry` sets the expiry date for etcd root CA.
 
 ```
 ca_etcd_csr_cn: Etcd
