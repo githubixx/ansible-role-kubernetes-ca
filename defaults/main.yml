@@ -8,8 +8,8 @@ ca_etcd_expiry: 87600h
 
 # Certificate authority for etcd certificates
 ca_etcd_csr_cn: Etcd
-ca_etcd_csr_key_algo: ecdsa
-ca_etcd_csr_key_size: 384
+ca_etcd_csr_key_algo: rsa
+ca_etcd_csr_key_size: 2048
 ca_etcd_csr_names_c: DE
 ca_etcd_csr_names_l: The_Internet
 ca_etcd_csr_names_o: Kubernetes
@@ -21,8 +21,8 @@ ca_k8s_apiserver_expiry: 87600h
 
 # Certificate authority for Kubernetes API server
 ca_k8s_apiserver_csr_cn: Kubernetes
-ca_k8s_apiserver_csr_key_algo: ecdsa
-ca_k8s_apiserver_csr_key_size: 384
+ca_k8s_apiserver_csr_key_algo: rsa
+ca_k8s_apiserver_csr_key_size: 2048
 ca_k8s_apiserver_csr_names_c: DE
 ca_k8s_apiserver_csr_names_l: The_Internet
 ca_k8s_apiserver_csr_names_o: Kubernetes
@@ -31,8 +31,8 @@ ca_k8s_apiserver_csr_names_st: Bayern
 
 # CSR parameter for etcd certificate
 etcd_csr_cn: Etcd
-etcd_csr_key_algo: ecdsa
-etcd_csr_key_size: 384
+etcd_csr_key_algo: rsa
+etcd_csr_key_size: 2048
 etcd_csr_names_c: DE
 etcd_csr_names_l: The_Internet
 etcd_csr_names_o: Kubernetes
@@ -41,8 +41,8 @@ etcd_csr_names_st: Bayern
 
 # CSR parameter for Kubernetes API server certificate
 k8s_apiserver_csr_cn: Kubernetes
-k8s_apiserver_csr_key_algo: ecdsa
-k8s_apiserver_csr_key_size: 384
+k8s_apiserver_csr_key_algo: rsa
+k8s_apiserver_csr_key_size: 2048
 k8s_apiserver_csr_names_c: DE
 k8s_apiserver_csr_names_l: The_Internet
 k8s_apiserver_csr_names_o: Kubernetes
