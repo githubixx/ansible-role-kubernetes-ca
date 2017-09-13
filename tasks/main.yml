@@ -1,9 +1,9 @@
 ---
 - name: Create directory for CA and certificate files
   file:
-    path: "{{cfssl_conf_directory}}"
-    owner: "{{cfssl_certificate_owner}}"
-    group: "{{cfssl_certificate_group}}"
+    path: "{{k8s_ca_conf_directory}}"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
     mode: 0755
     state: directory
   tags:
@@ -12,9 +12,9 @@
 - name: Create etcd CA configuration file
   template:
     src: "ca-etcd-config.json.j2"
-    dest: "{{cfssl_conf_directory}}/ca-etcd-config.json"
-    owner: "{{cfssl_certificate_owner}}"
-    group: "{{cfssl_certificate_group}}"
+    dest: "{{k8s_ca_conf_directory}}/ca-etcd-config.json"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
     mode: 0600
   tags:
     - kubernetes-ca
@@ -22,9 +22,9 @@
 - name: Create Kubernetes API server CA configuration file
   template:
     src: "ca-k8s-apiserver-config.json.j2"
-    dest: "{{cfssl_conf_directory}}/ca-k8s-apiserver-config.json"
-    owner: "{{cfssl_certificate_owner}}"
-    group: "{{cfssl_certificate_group}}"
+    dest: "{{k8s_ca_conf_directory}}/ca-k8s-apiserver-config.json"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
     mode: 0600
   tags:
     - kubernetes-ca
@@ -32,9 +32,9 @@
 - name: Copy the etcd CA certificate request file (CSR)
   template:
     src: "ca-etcd-csr.json.j2"
-    dest: "{{cfssl_conf_directory}}/ca-etcd-csr.json"
-    owner: "{{cfssl_certificate_owner}}"
-    group: "{{cfssl_certificate_group}}"
+    dest: "{{k8s_ca_conf_directory}}/ca-etcd-csr.json"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
     mode: 0600
   tags:
     - kubernetes-ca
@@ -42,9 +42,9 @@
 - name: Copy the Kubernetes API server CA certificate request file (CSR)
   template:
     src: "ca-k8s-apiserver-csr.json.j2"
-    dest: "{{cfssl_conf_directory}}/ca-k8s-apiserver-csr.json"
-    owner: "{{cfssl_certificate_owner}}"
-    group: "{{cfssl_certificate_group}}"
+    dest: "{{k8s_ca_conf_directory}}/ca-k8s-apiserver-csr.json"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
     mode: 0600
   tags:
     - kubernetes-ca 
@@ -52,25 +52,25 @@
 - name: Generate the etcd CA and private key
   shell: cfssl gencert -initca ca-etcd-csr.json | cfssljson -bare ca-etcd
   args:
-    chdir: "{{cfssl_conf_directory}}"
-    creates: "{{cfssl_conf_directory}}/ca-etcd-key.pem"
+    chdir: "{{k8s_ca_conf_directory}}"
+    creates: "{{k8s_ca_conf_directory}}/ca-etcd-key.pem"
   tags:
     - kubernetes-ca
 
 - name: Generate the Kubernetes API server CA and private key
   shell: cfssl gencert -initca ca-k8s-apiserver-csr.json | cfssljson -bare ca-k8s-apiserver
   args:
-    chdir: "{{cfssl_conf_directory}}"
-    creates: "{{cfssl_conf_directory}}/ca-k8s-apiserver-key.pem"
+    chdir: "{{k8s_ca_conf_directory}}"
+    creates: "{{k8s_ca_conf_directory}}/ca-k8s-apiserver-key.pem"
   tags:
     - kubernetes-ca
 
 - name: Create the etcd key CSR file
   template:
     src: cert-etcd-csr.json.j2
-    dest: "{{cfssl_conf_directory}}/cert-etcd-csr.json"
-    owner: "{{cfssl_certificate_owner}}"
-    group: "{{cfssl_certificate_group}}"
+    dest: "{{k8s_ca_conf_directory}}/cert-etcd-csr.json"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
     mode: 0600
   tags:
     - kubernetes-ca
@@ -78,25 +78,67 @@
 - name: Create the Kubernetes API server key CSR file
   template:
     src: cert-k8s-apiserver-csr.json.j2
-    dest: "{{cfssl_conf_directory}}/cert-k8s-apiserver-csr.json"
-    owner: "{{cfssl_certificate_owner}}"
-    group: "{{cfssl_certificate_group}}"
+    dest: "{{k8s_ca_conf_directory}}/cert-k8s-apiserver-csr.json"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
     mode: 0600
   tags:
     - kubernetes-ca
 
+- name: Create the admin user key CSR file
+  template:
+    src: cert-admin-csr.json.j2
+    dest: "{{k8s_ca_conf_directory}}/cert-admin-csr.json"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
+    mode: 0600
+  tags:
+    - kubernetes-ca
+
+- name: Create the worker key CSR files
+  template:
+    src: cert-worker-csr.json.j2
+    dest: "{{k8s_ca_conf_directory}}/cert-{{item}}-csr.json"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
+    mode: 0600
+  with_inventory_hostnames:
+    - k8s_worker
+  vars:
+    - workerHost: "{{item}}"
+  tags:
+    - kubernetes-ca
+
 - name: Generate TLS certificate for etcd
-  shell: cfssl gencert -ca=ca-etcd.pem -ca-key=ca-etcd-key.pem -config=ca-etcd-config.json -profile=etcd cert-etcd-csr.json | cfssljson -bare cert-etcd
+  shell: "cfssl gencert -ca=ca-etcd.pem -ca-key=ca-etcd-key.pem -config=ca-etcd-config.json -profile=etcd cert-etcd-csr.json | cfssljson -bare cert-etcd"
   args:
-    chdir: "{{cfssl_conf_directory}}"
-    creates: "{{cfssl_conf_directory}}/cert-etcd-key.pem"
+    chdir: "{{k8s_ca_conf_directory}}"
+    creates: "{{k8s_ca_conf_directory}}/cert-etcd-key.pem"
   tags:
     - kubernetes-ca
 
 - name: Generate TLS certificate for Kubernetes API server
-  shell: cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-k8s-apiserver-csr.json | cfssljson -bare cert-k8s-apiserver
+  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-k8s-apiserver-csr.json | cfssljson -bare cert-k8s-apiserver"
   args:
-    chdir: "{{cfssl_conf_directory}}"
-    creates: "{{cfssl_conf_directory}}/cert-k8s-apiserver-key.pem"
+    chdir: "{{k8s_ca_conf_directory}}"
+    creates: "{{k8s_ca_conf_directory}}/cert-k8s-apiserver-key.pem"
+  tags:
+    - kubernetes-ca
+
+- name: Generate TLS certificate for admin user
+  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-admin-csr.json | cfssljson -bare cert-admin"
+  args:
+    chdir: "{{k8s_ca_conf_directory}}"
+    creates: "{{k8s_ca_conf_directory}}/cert-admin-key.pem"
+  tags:
+    - kubernetes-ca
+
+- name: Generate TLS certificates for Kubernetes worker hosts
+  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -hostname={{item}},{{hostvars[item]['ansible_hostname']}},{{hostvars[item]['ansible_default_ipv4']['address']}},{{hostvars[item]['ansible_'+hostvars[item]['peervpn_conf_interface']].ipv4.address}} -profile=kubernetes cert-{{item}}-csr.json | cfssljson -bare cert-{{item}}"
+  args:
+    chdir: "{{k8s_ca_conf_directory}}"
+    creates: "{{k8s_ca_conf_directory}}/cert-{{item}}-key.pem"
+  with_inventory_hostnames:
+    - k8s_worker
   tags:
     - kubernetes-ca

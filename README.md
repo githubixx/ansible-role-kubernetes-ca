@@ -11,6 +11,9 @@ I tag every release and try to stay with [semantic versioning](http://semver.org
 * v2.0.0
 
 - renamed `cfssl_*` variables to `k8s_ca_*`
+- change defaults for key algos and sizes to match settings in https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/04-certificate-authority.md
+- added admin client certificate
+- added kubelet client certificates used in Kuberetes 1.7
 
 * v1.0.0
 
