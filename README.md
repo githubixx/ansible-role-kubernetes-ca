@@ -15,6 +15,8 @@ I tag every release and try to stay with [semantic versioning](http://semver.org
 - added admin client certificate
 - added kubelet client certificates used in Kuberetes 1.7
 - added kube-proxy client certificate used in Kubernetes 1.7
+- Hostname,FQDN,internal IP and PeerVPN IP of all controller hosts are added automatically to Kubernetes API server certificate now
+- Hostname,FQDN,internal IP and PeerVPN IP for every worker host certificate is added automatically to the worker certificate
 
 * v1.0.0
 
