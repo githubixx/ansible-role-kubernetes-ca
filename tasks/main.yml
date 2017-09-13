@@ -1,4 +1,28 @@
 ---
+- name: Generate list of IP addresses and hostnames needed for Kubernetes API server certificate
+  set_fact:
+    tmpControllerHosts: |
+      {% set comma = joiner(",") %}
+      {% for item in groups["k8s_controller"] -%}
+        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["peervpn_conf_interface"]].ipv4.address }}{{ comma() }}{{item}}{{ comma() }}{{hostvars[item]["ansible_hostname"]}}
+      {%- endfor %}
+      {% for item in k8s_apiserver_cert_hosts -%}
+        {{ comma() }}{{item}}
+      {%- endfor %}
+  tags:
+    - kubernetes-ca
+
+- name: Remove newline from controller hosts list
+  set_fact:
+    controllerHosts: "{{tmpControllerHosts |replace('\n', '')}}"
+  tags:
+    - kubernetes-ca
+
+- name: Output of hostnames/IPs used for Kubernetes API server certificate
+  debug: var=controllerHosts
+  tags:
+    - kubernetes-ca
+
 - name: Create directory for CA and certificate files
   file:
     path: "{{k8s_ca_conf_directory}}"
@@ -95,6 +119,16 @@
   tags:
     - kubernetes-ca
 
+- name: Create the kube-proxy key CSR file
+  template:
+    src: cert-kube-proxy-csr.json.j2
+    dest: "{{k8s_ca_conf_directory}}/cert-kube-proxy-csr.json"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
+    mode: 0600
+  tags:
+    - kubernetes-ca
+
 - name: Create the worker key CSR files
   template:
     src: cert-worker-csr.json.j2
@@ -118,7 +152,7 @@
     - kubernetes-ca
 
 - name: Generate TLS certificate for Kubernetes API server
-  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-k8s-apiserver-csr.json | cfssljson -bare cert-k8s-apiserver"
+  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -hostname={{controllerHosts}} -profile=kubernetes cert-k8s-apiserver-csr.json | cfssljson -bare cert-k8s-apiserver"
   args:
     chdir: "{{k8s_ca_conf_directory}}"
     creates: "{{k8s_ca_conf_directory}}/cert-k8s-apiserver-key.pem"
@@ -140,5 +174,13 @@
     creates: "{{k8s_ca_conf_directory}}/cert-{{item}}-key.pem"
   with_inventory_hostnames:
     - k8s_worker
+  tags:
+    - kubernetes-ca
+
+- name: Generate TLS certificate for kube-proxy
+  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-kube-proxy-csr.json | cfssljson -bare cert-kube-proxy"
+  args:
+    chdir: "{{k8s_ca_conf_directory}}"
+    creates: "{{k8s_ca_conf_directory}}/cert-kube-proxy-key.pem"
   tags:
     - kubernetes-ca

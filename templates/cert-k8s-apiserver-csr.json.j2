@@ -1,14 +1,5 @@
 {
   "CN": "{{k8s_apiserver_csr_cn}}",
-  "hosts": [
-    {% for item in k8s_apiserver_cert_hosts %}
-    {% if not loop.last %}
-    "{{ item }}",
-    {% else %}
-    "{{ item }}"
-    {% endif %}
-    {% endfor %}
-  ],
   "key": {
     "algo": "{{k8s_apiserver_csr_key_algo}}",
     "size": {{k8s_apiserver_csr_key_size}}

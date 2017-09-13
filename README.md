@@ -14,6 +14,7 @@ I tag every release and try to stay with [semantic versioning](http://semver.org
 - change defaults for key algos and sizes to match settings in https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/04-certificate-authority.md
 - added admin client certificate
 - added kubelet client certificates used in Kuberetes 1.7
+- added kube-proxy client certificate used in Kubernetes 1.7
 
 * v1.0.0
 
