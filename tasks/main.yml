@@ -42,6 +42,7 @@
     mode: 0600
   tags:
     - kubernetes-ca
+    - kubernetes-ca-etcd
 
 - name: Create Kubernetes API server CA configuration file
   template:
@@ -62,6 +63,7 @@
     mode: 0600
   tags:
     - kubernetes-ca
+    - kubernetes-ca-etcd
 
 - name: Copy the Kubernetes API server CA certificate request file (CSR)
   template:
@@ -80,6 +82,7 @@
     creates: "{{k8s_ca_conf_directory}}/ca-etcd-key.pem"
   tags:
     - kubernetes-ca
+    - kubernetes-ca-etcd
 
 - name: Generate the Kubernetes API server CA and private key
   shell: cfssl gencert -initca ca-k8s-apiserver-csr.json | cfssljson -bare ca-k8s-apiserver
@@ -98,6 +101,7 @@
     mode: 0600
   tags:
     - kubernetes-ca
+    - kubernetes-ca-etcd
 
 - name: Create the Kubernetes API server key CSR file
   template:
@@ -150,6 +154,7 @@
     creates: "{{k8s_ca_conf_directory}}/cert-etcd-key.pem"
   tags:
     - kubernetes-ca
+    - kubernetes-ca-etcd
 
 - name: Generate TLS certificate for Kubernetes API server
   shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -hostname={{controllerHosts}} -profile=kubernetes cert-k8s-apiserver-csr.json | cfssljson -bare cert-k8s-apiserver"
