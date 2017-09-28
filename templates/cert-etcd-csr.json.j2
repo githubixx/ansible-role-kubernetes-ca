@@ -1,14 +1,5 @@
 {
   "CN": "{{etcd_csr_cn}}",
-  "hosts": [
-    {% for item in etcd_cert_hosts %}
-    {% if not loop.last %}
-    "{{ item }}",
-    {% else %}
-    "{{ item }}"
-    {% endif %}
-    {% endfor %}
-  ],
   "key": {
     "algo": "{{etcd_csr_key_algo}}",
     "size": {{etcd_csr_key_size}}
