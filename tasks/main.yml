@@ -23,6 +23,33 @@
   tags:
     - kubernetes-ca
 
+- name: Generate list of IP addresses and hostnames needed for etcd certificate
+  set_fact:
+    tmpEtcdHosts: |
+      {% set comma = joiner(",") %}
+      {% for item in groups["k8s_etcd"] -%}
+        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["peervpn_conf_interface"]].ipv4.address }}{{ comma() }}{{item}}{{ comma() }}{{hostvars[item]["ansible_hostname"]}}
+      {%- endfor %}
+      {% for item in etcd_cert_hosts -%}
+        {{ comma() }}{{item}}
+      {%- endfor %}
+  tags:
+    - kubernetes-ca
+    - kubernetes-ca-etcd
+
+- name: Remove newline from etcd hosts list
+  set_fact:
+    etcdHosts: "{{tmpEtcdHosts |replace('\n', '')}}"
+  tags:
+    - kubernetes-ca
+    - kubernetes-ca-etcd
+
+- name: Output of hostnames/IPs used for etcd certificate
+  debug: var=etcdHosts
+  tags:
+    - kubernetes-ca
+    - kubernetes-ca-etcd
+
 - name: Create directory for CA and certificate files
   file:
     path: "{{k8s_ca_conf_directory}}"
@@ -148,7 +175,7 @@
     - kubernetes-ca
 
 - name: Generate TLS certificate for etcd
-  shell: "cfssl gencert -ca=ca-etcd.pem -ca-key=ca-etcd-key.pem -config=ca-etcd-config.json -profile=etcd cert-etcd-csr.json | cfssljson -bare cert-etcd"
+  shell: "cfssl gencert -ca=ca-etcd.pem -ca-key=ca-etcd-key.pem -config=ca-etcd-config.json -hostname={{etcdHosts}} -profile=etcd cert-etcd-csr.json | cfssljson -bare cert-etcd"
   args:
     chdir: "{{k8s_ca_conf_directory}}"
     creates: "{{k8s_ca_conf_directory}}/cert-etcd-key.pem"
