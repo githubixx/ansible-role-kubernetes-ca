@@ -200,7 +200,7 @@
     - kubernetes-ca
 
 - name: Generate TLS certificates for Kubernetes worker hosts
-  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -hostname={{item}},{{hostvars[item]['ansible_hostname']}},{{hostvars[item]['ansible_default_ipv4']['address']}},{{hostvars[item]['ansible_'+hostvars[item]['peervpn_conf_interface']].ipv4.address}} -profile=kubernetes cert-{{item}}-csr.json | cfssljson -bare cert-{{item}}"
+  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -hostname={{hostvars[item]['ansible_hostname']}},{{hostvars[item]['ansible_default_ipv4']['address']}},{{hostvars[item]['ansible_'+hostvars[item]['peervpn_conf_interface']].ipv4.address}} -profile=kubernetes cert-{{item}}-csr.json | cfssljson -bare cert-{{item}}"
   args:
     chdir: "{{k8s_ca_conf_directory}}"
     creates: "{{k8s_ca_conf_directory}}/cert-{{item}}-key.pem"
