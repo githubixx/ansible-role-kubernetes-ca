@@ -1,5 +1,5 @@
 ---
-k8s_ca_conf_directory: /etc/k8s/certs
+k8s_ca_conf_directory: /etc/k8s-certs
 k8s_ca_certificate_owner: root
 k8s_ca_certificate_group: root
 
