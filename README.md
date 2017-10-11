@@ -1,5 +1,5 @@
-role-kubernetes-ca
-==================
+ansible-role-kubernetes-ca
+==========================
 
 This role is used in [Kubernetes the not so hard way with Ansible (at scaleway) - Part 4 - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-at-scaleway-part-4/). It basically creates two CA's (one for etcd and one for Kubernetes API server) and the certificates needed to secure communication of the Kubernetes components. Besides the Kubernetes API server none of the Kubernetes components should communicate with the etcd cluster directly. For more information see [Kubernetes the not so hard way with Ansible (at scaleway) - Part 4 - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-at-scaleway-part-4/).
 
@@ -160,7 +160,7 @@ k8s_apiserver_cert_hosts:
 ```
 Here the same is basically true as with `etcd_cert_hosts` but we also include the Kubernetes service IP `10.32.0.1` (which you will get BTW if you execute `nslookup kubernetes` later in one of the pods). We also include 127.0.0.1 (localhost), additional hostname's for the worker/controller (just to be sure) and we include some default Kubernetes hostname's that are available by default if KubeDNS is deployed.
 
-In general I need to do more testing to be sure if the values in `etcd_cert_hosts` and `k8s_apiserver_cert_hosts` are really needed. But while developing this Kubernetes roles it is annoying if you get error's because the certificates are not correct. And it takes a while to replace them. So I'll keep it here for now until I know better ;-)
+In general I need to do more testing to be sure if the values in `etcd_cert_hosts` and `k8s_apiserver_cert_hosts` are really needed. But while developing this Kubernetes roles it was annoying if you get error's because the certificates are not correct. And it takes a while to replace them. So I'll keep it here for now until I know better ;-)
 
 Example Playbook
 ----------------
