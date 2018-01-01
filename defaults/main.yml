@@ -1,82 +1,82 @@
 ---
-k8s_ca_conf_directory: /etc/k8s-certs
-k8s_ca_certificate_owner: root
-k8s_ca_certificate_group: root
+k8s_ca_conf_directory: "{{ '~/k8s/certs' | expanduser }}"
+k8s_ca_certificate_owner: "root"
+k8s_ca_certificate_group: "root"
 
 # Expiry for etcd root certificate
-ca_etcd_expiry: 87600h
+ca_etcd_expiry: "87600h"
 
 # Certificate authority for etcd certificates
-ca_etcd_csr_cn: Etcd
-ca_etcd_csr_key_algo: rsa
-ca_etcd_csr_key_size: 2048
-ca_etcd_csr_names_c: DE
-ca_etcd_csr_names_l: The_Internet
-ca_etcd_csr_names_o: Kubernetes
-ca_etcd_csr_names_ou: BY
-ca_etcd_csr_names_st: Bayern
+ca_etcd_csr_cn: "Etcd"
+ca_etcd_csr_key_algo: "rsa"
+ca_etcd_csr_key_size: "2048"
+ca_etcd_csr_names_c: "DE"
+ca_etcd_csr_names_l: "The_Internet"
+ca_etcd_csr_names_o: "Kubernetes"
+ca_etcd_csr_names_ou: "BY"
+ca_etcd_csr_names_st: "Bayern"
 
 # Expiry for Kubernetes API server root certificates
-ca_k8s_apiserver_expiry: 87600h
+ca_k8s_apiserver_expiry: "87600h"
 
 # Certificate authority for Kubernetes API server
-ca_k8s_apiserver_csr_cn: Kubernetes
-ca_k8s_apiserver_csr_key_algo: rsa
-ca_k8s_apiserver_csr_key_size: 2048
-ca_k8s_apiserver_csr_names_c: DE
-ca_k8s_apiserver_csr_names_l: The_Internet
-ca_k8s_apiserver_csr_names_o: Kubernetes
-ca_k8s_apiserver_csr_names_ou: BY
-ca_k8s_apiserver_csr_names_st: Bayern
+ca_k8s_apiserver_csr_cn: "Kubernetes"
+ca_k8s_apiserver_csr_key_algo: "rsa"
+ca_k8s_apiserver_csr_key_size: "2048"
+ca_k8s_apiserver_csr_names_c: "DE"
+ca_k8s_apiserver_csr_names_l: "The_Internet"
+ca_k8s_apiserver_csr_names_o: "Kubernetes"
+ca_k8s_apiserver_csr_names_ou: "BY"
+ca_k8s_apiserver_csr_names_st: "Bayern"
 
 # CSR parameter for etcd certificate
-etcd_csr_cn: Etcd
-etcd_csr_key_algo: rsa
-etcd_csr_key_size: 2048
-etcd_csr_names_c: DE
-etcd_csr_names_l: The_Internet
-etcd_csr_names_o: Kubernetes
-etcd_csr_names_ou: BY
-etcd_csr_names_st: Bayern
+etcd_csr_cn: "Etcd"
+etcd_csr_key_algo: "rsa"
+etcd_csr_key_size: "2048"
+etcd_csr_names_c: "DE"
+etcd_csr_names_l: "The_Internet"
+etcd_csr_names_o: "Kubernetes"
+etcd_csr_names_ou: "BY"
+etcd_csr_names_st: "Bayern"
 
 # CSR parameter for Kubernetes API server certificate
-k8s_apiserver_csr_cn: Kubernetes
-k8s_apiserver_csr_key_algo: rsa
-k8s_apiserver_csr_key_size: 2048
-k8s_apiserver_csr_names_c: DE
-k8s_apiserver_csr_names_l: The_Internet
-k8s_apiserver_csr_names_o: Kubernetes
-k8s_apiserver_csr_names_ou: BY
-k8s_apiserver_csr_names_st: Bayern
+k8s_apiserver_csr_cn: "Kubernetes"
+k8s_apiserver_csr_key_algo: "rsa"
+k8s_apiserver_csr_key_size: "2048"
+k8s_apiserver_csr_names_c: "DE"
+k8s_apiserver_csr_names_l: "The_Internet"
+k8s_apiserver_csr_names_o: "Kubernetes"
+k8s_apiserver_csr_names_ou: "BY"
+k8s_apiserver_csr_names_st: "Bayern"
 
 # CSR parameter for the admin user
-k8s_admin_csr_cn: admin
-k8s_admin_csr_key_algo: rsa
-k8s_admin_csr_key_size: 2048
-k8s_admin_csr_names_c: DE
-k8s_admin_csr_names_l: The_Internet
-k8s_admin_csr_names_o: system:masters # DO NOT CHANGE!
-k8s_admin_csr_names_ou: BY
-k8s_admin_csr_names_st: Bayern
+k8s_admin_csr_cn: "admin"
+k8s_admin_csr_key_algo: "rsa"
+k8s_admin_csr_key_size: "2048"
+k8s_admin_csr_names_c: "DE"
+k8s_admin_csr_names_l: "The_Internet"
+k8s_admin_csr_names_o: "system:masters" # DO NOT CHANGE!
+k8s_admin_csr_names_ou: "BY"
+k8s_admin_csr_names_st: "Bayern"
 
 # CSR parameter for kubelet client certificates
-k8s_worker_csr_key_algo: rsa
-k8s_worker_csr_key_size: 2048
-k8s_worker_csr_names_c: DE
-k8s_worker_csr_names_l: The_Internet
-k8s_worker_csr_names_o: system:nodes # DO NOT CHANGE!
-k8s_worker_csr_names_ou: BY
-k8s_worker_csr_names_st: Bayern
+k8s_worker_csr_key_algo: "rsa"
+k8s_worker_csr_key_size: "2048"
+k8s_worker_csr_names_c: "DE"
+k8s_worker_csr_names_l: "The_Internet"
+k8s_worker_csr_names_o: "system:nodes" # DO NOT CHANGE!
+k8s_worker_csr_names_ou: "BY"
+k8s_worker_csr_names_st: "Bayern"
 
 # CSR parameter for the kube-proxy client certificate
-k8s_kube_proxy_csr_cn: system:kube-proxy # DO NOT CHANGE!
-k8s_kube_proxy_csr_key_algo: rsa
-k8s_kube_proxy_csr_key_size: 2048
-k8s_kube_proxy_csr_names_c: DE
-k8s_kube_proxy_csr_names_l: The_Internet
-k8s_kube_proxy_csr_names_o: system:node-proxier # DO NOT CHANGE!
-k8s_kube_proxy_csr_names_ou: BY
-k8s_kube_proxy_csr_names_st: Bayern
+k8s_kube_proxy_csr_cn: "system:kube-proxy" # DO NOT CHANGE!
+k8s_kube_proxy_csr_key_algo: "rsa"
+k8s_kube_proxy_csr_key_size: "2048"
+k8s_kube_proxy_csr_names_c: "DE"
+k8s_kube_proxy_csr_names_l: "The_Internet"
+k8s_kube_proxy_csr_names_o: "system:node-proxier" # DO NOT CHANGE!
+k8s_kube_proxy_csr_names_ou: "BY"
+k8s_kube_proxy_csr_names_st: "Bayern"
 
 etcd_cert_hosts:
   - 127.0.0.1
