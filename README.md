@@ -10,7 +10,7 @@ I tag every release and try to stay with [semantic versioning](http://semver.org
 
 **r4.0.1_v1.8.4**
 
-- Changed default of `k8s_ca_conf_directory` to `{{ '~/k8s/certs' | expanduser }}`. By default this will expand to user's LOCAL $HOME (the user that run's "ansible-playbook ..." plus "/k8s/certs". That means if the user's $HOME directory is e.g. "/home/da_user" then "k8s_ca_conf_directory" will have a value of "/home/da_user/k8s/certs". As the user normally has write access to his $HOME directory we don't rely on the parent directory permission if we deploy the role without root permissions. If you defined this variable with a different value before this change then you don't need to bother about this change.
+- Changed default of `k8s_ca_conf_directory` to `{{ '~/k8s/certs' | expanduser }}`. By default this will expand to user's LOCAL $HOME (the user that run's `ansible-playbook ...` plus `/k8s/certs`. That means if the user's `$HOME` directory is e.g. `/home/da_user` then `k8s_ca_conf_directory` will have a value of `/home/da_user/k8s/certs`. As the user normally has write access to his `$HOME` directory we don't rely on the parent directory permission if we deploy the role without root permissions. If you defined this variable with a different value before this change then you don't need to bother about this change.
 
 **r3.0.0_v1.8.4**
 
