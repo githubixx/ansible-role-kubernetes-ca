@@ -8,15 +8,15 @@ Versions
 
 I tag every release and try to stay with [semantic versioning](http://semver.org) (well kind of). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `r1.0.0_v1.8.0` means this is release 1.0.0 of this role and it's meant to be used with Kubernetes version 1.8.0. If the role itself changes `rX.Y.Z` will increase. If the Kubernetes version changes `vX.Y.Z` will increase. This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release.
 
-* r4.0.0_v1.8.0
+**r4.0.0_v1.8.4**
 
-- *BREAKING:* Changed default of `k8s_ca_conf_directory` to `{{ '~/k8s/certs' | expanduser }}`. By default this will expand to user's LOCAL $HOME (the user that run's "ansible-playbook ..." plus "/k8s/certs". That means if the user's $HOME directory is e.g. "/home/da_user" then "k8s_ca_conf_directory" will have a value of "/home/da_user/k8s/certs". As the user normally has write access to his $HOME directory we don't rely on the parent directory permission if we deploy the role without root permissions. If you defined this variable with a different value before this change then you don't need to bother about this change.
+- Changed default of `k8s_ca_conf_directory` to `{{ '~/k8s/certs' | expanduser }}`. By default this will expand to user's LOCAL $HOME (the user that run's "ansible-playbook ..." plus "/k8s/certs". That means if the user's $HOME directory is e.g. "/home/da_user" then "k8s_ca_conf_directory" will have a value of "/home/da_user/k8s/certs". As the user normally has write access to his $HOME directory we don't rely on the parent directory permission if we deploy the role without root permissions. If you defined this variable with a different value before this change then you don't need to bother about this change.
 
-* r3.0.0
+**r3.0.0_v1.8.4**
 
 - include worker node names/ips into CSR (certificate signing request) for kube-apiserver certificate
 
-* r1.0.0_v1.8.0
+**r1.0.1_v1.8.0**
 
 - renamed `cfssl_*` variables to `k8s_ca_*`
 - change defaults for key algos and sizes to match settings in https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/04-certificate-authority.md
@@ -26,7 +26,7 @@ I tag every release and try to stay with [semantic versioning](http://semver.org
 - Hostname,FQDN,internal IP and PeerVPN IP of all controller hosts are added automatically to Kubernetes API server certificate now
 - Hostname,FQDN,internal IP and PeerVPN IP for every worker host certificate is added automatically to the worker certificate
 
-* v1.0.0
+**r1.0.0_v1.6.0**
 
 - Initial Ansible role.
 
