@@ -177,6 +177,16 @@
   tags:
     - kubernetes-ca
 
+- name: Create the kube-controller-manager key CSR file
+  template:
+    src: cert-k8s-controller-manager-csr.json.j2
+    dest: "{{k8s_ca_conf_directory}}/cert-k8s-controller-manager-csr.json"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
+    mode: 0600
+  tags:
+    - kubernetes-ca
+
 - name: Generate TLS certificate for etcd
   shell: "cfssl gencert -ca=ca-etcd.pem -ca-key=ca-etcd-key.pem -config=ca-etcd-config.json -hostname={{etcdHosts}} -profile=etcd cert-etcd-csr.json | cfssljson -bare cert-etcd"
   args:
@@ -217,5 +227,13 @@
   args:
     chdir: "{{k8s_ca_conf_directory}}"
     creates: "{{k8s_ca_conf_directory}}/cert-kube-proxy-key.pem"
+  tags:
+    - kubernetes-ca
+
+- name: Generate TLS certificate for kube-controller-manager
+  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-k8s-controller-manager-csr.json | cfssljson -bare cert-k8s-controller-manager"
+  args:
+    chdir: "{{k8s_ca_conf_directory}}"
+    creates: "{{k8s_ca_conf_directory}}/cert-k8s-controller-manager-key.pem"
   tags:
     - kubernetes-ca
