@@ -158,6 +158,18 @@ k8s_scheduler_csr_names_st: "Bayern"
 This variables are needed to generate the CSR for the `kube-scheduler` client certificate.
 
 ```
+k8s_controller_manager_sa_csr_cn: "service-accounts"
+k8s_controller_manager_sa_csr_key_algo: "rsa"
+k8s_controller_manager_sa_csr_key_size: "2048"
+k8s_controller_manager_sa_csr_names_c: "DE"
+k8s_controller_manager_sa_csr_names_l: "The_Internet"
+k8s_controller_manager_sa_csr_names_o: "Kubernetes"
+k8s_controller_manager_sa_csr_names_ou: "BY"
+k8s_controller_manager_sa_csr_names_st: "Bayern"
+```
+CSR parameter for kube-controller-manager service account key pair. The kube-controller-manager leverages a key pair to generate and sign service account tokens as described in the [managing service accounts](https://kubernetes.io/docs/admin/service-accounts-admin/) documentation.
+
+```
 k8s_kube_proxy_csr_cn: "system:kube-proxy" # DO NOT CHANGE!
 k8s_kube_proxy_csr_key_algo: "rsa"
 k8s_kube_proxy_csr_key_size: "2048"

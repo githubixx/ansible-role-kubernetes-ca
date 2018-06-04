@@ -101,6 +101,16 @@ k8s_scheduler_csr_names_o: "system:kube-scheduler" # DO NOT CHANGE!
 k8s_scheduler_csr_names_ou: "BY"
 k8s_scheduler_csr_names_st: "Bayern"
 
+# CSR parameter for kube-controller-manager service account key pair. Used to generate and sign service account tokens.
+k8s_controller_manager_sa_csr_cn: "service-accounts"
+k8s_controller_manager_sa_csr_key_algo: "rsa"
+k8s_controller_manager_sa_csr_key_size: "2048"
+k8s_controller_manager_sa_csr_names_c: "DE"
+k8s_controller_manager_sa_csr_names_l: "The_Internet"
+k8s_controller_manager_sa_csr_names_o: "Kubernetes"
+k8s_controller_manager_sa_csr_names_ou: "BY"
+k8s_controller_manager_sa_csr_names_st: "Bayern"
+
 etcd_cert_hosts:
   - 127.0.0.1
   - etcd0
