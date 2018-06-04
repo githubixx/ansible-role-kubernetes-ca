@@ -237,3 +237,11 @@
     creates: "{{k8s_ca_conf_directory}}/cert-k8s-controller-manager-key.pem"
   tags:
     - kubernetes-ca
+
+- name: Generate TLS certificate for kube-scheduler
+  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-k8s-scheduler-csr.json | cfssljson -bare cert-k8s-scheduler"
+  args:
+    chdir: "{{k8s_ca_conf_directory}}"
+    creates: "{{k8s_ca_conf_directory}}/cert-k8s-scheduler-key.pem"
+  tags:
+    - kubernetes-ca

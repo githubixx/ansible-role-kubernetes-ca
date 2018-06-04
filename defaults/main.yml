@@ -92,6 +92,15 @@ k8s_controller_manager_csr_names_o: "system:kube-controller-manager" # DO NOT CH
 k8s_controller_manager_csr_names_ou: "BY"
 k8s_controller_manager_csr_names_st: "Bayern"
 
+# CSR parameter for the kube-scheduler client certificate
+k8s_scheduler_csr_key_algo: "rsa"
+k8s_scheduler_csr_key_size: "2048"
+k8s_scheduler_csr_names_c: "DE"
+k8s_scheduler_csr_names_l: "The_Internet"
+k8s_scheduler_csr_names_o: "system:kube-scheduler" # DO NOT CHANGE!
+k8s_scheduler_csr_names_ou: "BY"
+k8s_scheduler_csr_names_st: "Bayern"
+
 etcd_cert_hosts:
   - 127.0.0.1
   - etcd0

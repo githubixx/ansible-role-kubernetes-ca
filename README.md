@@ -12,6 +12,7 @@ I tag every release and try to stay with [semantic versioning](http://semver.org
 
 - Implemented changes needed for Kubernetes v1.10.x.
 - Added `k8s_controller_manager_csr_*` variables for kube-controller-manager client certificate
+- Added `k8s_scheduler_csr_*` variables for kube-scheduler client certificate
 
 **r4.0.1_v1.8.4**
 
@@ -133,6 +134,28 @@ k8s_worker_csr_names_ou: "BY"
 k8s_worker_csr_names_st: "Bayern"
 ```
 CSR parameter for kubelet client certificates.
+
+```
+k8s_controller_manager_csr_key_algo: "rsa"
+k8s_controller_manager_csr_key_size: "2048"
+k8s_controller_manager_csr_names_c: "DE"
+k8s_controller_manager_csr_names_l: "The_Internet"
+k8s_controller_manager_csr_names_o: "system:kube-controller-manager" # DO NOT CHANGE!
+k8s_controller_manager_csr_names_ou: "BY"
+k8s_controller_manager_csr_names_st: "Bayern"
+```
+This variables are needed to generate the CSR for the `kube-controller-manager` client certificate.
+
+```
+k8s_scheduler_csr_key_algo: "rsa"
+k8s_scheduler_csr_key_size: "2048"
+k8s_scheduler_csr_names_c: "DE"
+k8s_scheduler_csr_names_l: "The_Internet"
+k8s_scheduler_csr_names_o: "system:kube-scheduler" # DO NOT CHANGE!
+k8s_scheduler_csr_names_ou: "BY"
+k8s_scheduler_csr_names_st: "Bayern"
+```
+This variables are needed to generate the CSR for the `kube-scheduler` client certificate.
 
 ```
 k8s_kube_proxy_csr_cn: "system:kube-proxy" # DO NOT CHANGE!
