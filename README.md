@@ -194,18 +194,12 @@ Here you can add additional etcd hosts that should be included in the certificat
 k8s_apiserver_cert_hosts:
   - 127.0.0.1
   - 10.32.0.1
-  - controller0
-  - controller1
-  - controller2
-  - worker0
-  - worker1
-  - worker2
   - kubernetes
   - kubernetes.default
   - kubernetes.default.svc
   - kubernetes.default.svc.cluster.local
 ```
-Here the same is basically true as with `etcd_cert_hosts` but we also include the Kubernetes service IP `10.32.0.1` (which you will get BTW if you execute `nslookup kubernetes` later in one of the pods). We also include 127.0.0.1 (localhost), additional hostname's for the worker/controller (just to be sure) and we include some default Kubernetes hostname's that are available by default if KubeDNS is deployed.
+Here the same is basically true as with `etcd_cert_hosts` but we also include the Kubernetes service IP `10.32.0.1` (which you will get BTW if you execute `nslookup kubernetes` later in one of the pods). We also include 127.0.0.1 (localhost) and we include some default Kubernetes hostname's that are available by default if KubeDNS is deployed.
 
 In general I need to do more testing to be sure if the values in `etcd_cert_hosts` and `k8s_apiserver_cert_hosts` are really needed. But while developing this Kubernetes roles it was annoying if you get error's because the certificates are not correct. And it takes a while to replace them. So I'll keep it here for now until I know better ;-)
 
