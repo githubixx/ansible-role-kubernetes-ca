@@ -11,6 +11,7 @@ I tag every release and try to stay with [semantic versioning](http://semver.org
 **r5.0.0_v1.10.4**
 
 - Implemented changes needed for Kubernetes v1.10.x.
+- Renamed certificate files `cert-kube-proxy*` -> `cert-k8s-proxy*` to be in pair with the other certificate file names
 - Added `k8s_controller_manager_csr_*` variables for kube-controller-manager client certificate
 - Added `k8s_scheduler_csr_*` variables for kube-scheduler client certificate
 
