@@ -124,7 +124,7 @@
 
 - name: Create the etcd key CSR file
   template:
-    src: cert-etcd-csr.json.j2
+    src: "cert-etcd-csr.json.j2"
     dest: "{{k8s_ca_conf_directory}}/cert-etcd-csr.json"
     owner: "{{k8s_ca_certificate_owner}}"
     group: "{{k8s_ca_certificate_group}}"
@@ -135,7 +135,7 @@
 
 - name: Create the Kubernetes API server key CSR file
   template:
-    src: cert-k8s-apiserver-csr.json.j2
+    src: "cert-k8s-apiserver-csr.json.j2"
     dest: "{{k8s_ca_conf_directory}}/cert-k8s-apiserver-csr.json"
     owner: "{{k8s_ca_certificate_owner}}"
     group: "{{k8s_ca_certificate_group}}"
@@ -145,7 +145,7 @@
 
 - name: Create the admin user key CSR file
   template:
-    src: cert-admin-csr.json.j2
+    src: "cert-admin-csr.json.j2"
     dest: "{{k8s_ca_conf_directory}}/cert-admin-csr.json"
     owner: "{{k8s_ca_certificate_owner}}"
     group: "{{k8s_ca_certificate_group}}"
@@ -155,8 +155,8 @@
 
 - name: Create the kube-proxy key CSR file
   template:
-    src: cert-kube-proxy-csr.json.j2
-    dest: "{{k8s_ca_conf_directory}}/cert-kube-proxy-csr.json"
+    src: "cert-k8s-proxy-csr.json.j2"
+    dest: "{{k8s_ca_conf_directory}}/cert-k8s-proxy-csr.json"
     owner: "{{k8s_ca_certificate_owner}}"
     group: "{{k8s_ca_certificate_group}}"
     mode: 0600
@@ -165,7 +165,7 @@
 
 - name: Create the worker key CSR files
   template:
-    src: cert-worker-csr.json.j2
+    src: "cert-worker-csr.json.j2"
     dest: "{{k8s_ca_conf_directory}}/cert-{{item}}-csr.json"
     owner: "{{k8s_ca_certificate_owner}}"
     group: "{{k8s_ca_certificate_group}}"
@@ -179,8 +179,28 @@
 
 - name: Create the kube-controller-manager key CSR file
   template:
-    src: cert-k8s-controller-manager-csr.json.j2
+    src: "cert-k8s-controller-manager-csr.json.j2"
     dest: "{{k8s_ca_conf_directory}}/cert-k8s-controller-manager-csr.json"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
+    mode: 0600
+  tags:
+    - kubernetes-ca
+
+- name: Create the kube-controller-manager service-account key CSR file
+  template:
+    src: "cert-k8s-controller-manager-sa-csr.json.j2"
+    dest: "{{k8s_ca_conf_directory}}/cert-k8s-controller-manager-sa-csr.json"
+    owner: "{{k8s_ca_certificate_owner}}"
+    group: "{{k8s_ca_certificate_group}}"
+    mode: 0600
+  tags:
+    - kubernetes-ca
+
+- name: Create the kube-scheduler key CSR file
+  template:
+    src: "cert-k8s-scheduler-csr.json.j2"
+    dest: "{{k8s_ca_conf_directory}}/cert-k8s-scheduler-csr.json"
     owner: "{{k8s_ca_certificate_owner}}"
     group: "{{k8s_ca_certificate_group}}"
     mode: 0600
@@ -223,10 +243,10 @@
     - kubernetes-ca
 
 - name: Generate TLS certificate for kube-proxy
-  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-kube-proxy-csr.json | cfssljson -bare cert-kube-proxy"
+  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-k8s-proxy-csr.json | cfssljson -bare cert-k8s-proxy"
   args:
     chdir: "{{k8s_ca_conf_directory}}"
-    creates: "{{k8s_ca_conf_directory}}/cert-kube-proxy-key.pem"
+    creates: "{{k8s_ca_conf_directory}}/cert-k8s-proxy-key.pem"
   tags:
     - kubernetes-ca
 
