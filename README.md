@@ -8,6 +8,13 @@ Versions
 
 I tag every release and try to stay with [semantic versioning](http://semver.org) (well kind of). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `r1.0.0_v1.8.0` means this is release 1.0.0 of this role and it's meant to be used with Kubernetes version 1.8.0. If the role itself changes `rX.Y.Z` will increase. If the Kubernetes version changes `vX.Y.Z` will increase. This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release.
 
+**r5.0.0_v1.10.4**
+
+- Implemented changes needed for Kubernetes v1.10.x.
+- Renamed certificate files `cert-kube-proxy*` -> `cert-k8s-proxy*` to be in pair with the other certificate file names
+- Added `k8s_controller_manager_csr_*` variables for kube-controller-manager client certificate
+- Added `k8s_scheduler_csr_*` variables for kube-scheduler client certificate
+
 **r4.0.1_v1.9.8**
 
 - No changes. Just added Git tag for Kubernetes v1.9.8 to be in pair with controller and worker roles.
@@ -138,6 +145,40 @@ k8s_worker_csr_names_st: "Bayern"
 CSR parameter for kubelet client certificates.
 
 ```
+k8s_controller_manager_csr_key_algo: "rsa"
+k8s_controller_manager_csr_key_size: "2048"
+k8s_controller_manager_csr_names_c: "DE"
+k8s_controller_manager_csr_names_l: "The_Internet"
+k8s_controller_manager_csr_names_o: "system:kube-controller-manager" # DO NOT CHANGE!
+k8s_controller_manager_csr_names_ou: "BY"
+k8s_controller_manager_csr_names_st: "Bayern"
+```
+This variables are needed to generate the CSR for the `kube-controller-manager` client certificate.
+
+```
+k8s_scheduler_csr_key_algo: "rsa"
+k8s_scheduler_csr_key_size: "2048"
+k8s_scheduler_csr_names_c: "DE"
+k8s_scheduler_csr_names_l: "The_Internet"
+k8s_scheduler_csr_names_o: "system:kube-scheduler" # DO NOT CHANGE!
+k8s_scheduler_csr_names_ou: "BY"
+k8s_scheduler_csr_names_st: "Bayern"
+```
+This variables are needed to generate the CSR for the `kube-scheduler` client certificate.
+
+```
+k8s_controller_manager_sa_csr_cn: "service-accounts"
+k8s_controller_manager_sa_csr_key_algo: "rsa"
+k8s_controller_manager_sa_csr_key_size: "2048"
+k8s_controller_manager_sa_csr_names_c: "DE"
+k8s_controller_manager_sa_csr_names_l: "The_Internet"
+k8s_controller_manager_sa_csr_names_o: "Kubernetes"
+k8s_controller_manager_sa_csr_names_ou: "BY"
+k8s_controller_manager_sa_csr_names_st: "Bayern"
+```
+CSR parameter for kube-controller-manager service account key pair. The kube-controller-manager leverages a key pair to generate and sign service account tokens as described in the [managing service accounts](https://kubernetes.io/docs/admin/service-accounts-admin/) documentation.
+
+```
 k8s_kube_proxy_csr_cn: "system:kube-proxy" # DO NOT CHANGE!
 k8s_kube_proxy_csr_key_algo: "rsa"
 k8s_kube_proxy_csr_key_size: "2048"
@@ -162,18 +203,12 @@ Here you can add additional etcd hosts that should be included in the certificat
 k8s_apiserver_cert_hosts:
   - 127.0.0.1
   - 10.32.0.1
-  - controller0
-  - controller1
-  - controller2
-  - worker0
-  - worker1
-  - worker2
   - kubernetes
   - kubernetes.default
   - kubernetes.default.svc
   - kubernetes.default.svc.cluster.local
 ```
-Here the same is basically true as with `etcd_cert_hosts` but we also include the Kubernetes service IP `10.32.0.1` (which you will get BTW if you execute `nslookup kubernetes` later in one of the pods). We also include 127.0.0.1 (localhost), additional hostname's for the worker/controller (just to be sure) and we include some default Kubernetes hostname's that are available by default if KubeDNS is deployed.
+Here the same is basically true as with `etcd_cert_hosts` but we also include the Kubernetes service IP `10.32.0.1` (which you will get BTW if you execute `nslookup kubernetes` later in one of the pods). We also include 127.0.0.1 (localhost) and we include some default Kubernetes hostname's that are available by default if KubeDNS is deployed.
 
 In general I need to do more testing to be sure if the values in `etcd_cert_hosts` and `k8s_apiserver_cert_hosts` are really needed. But while developing this Kubernetes roles it was annoying if you get error's because the certificates are not correct. And it takes a while to replace them. So I'll keep it here for now until I know better ;-)
 
