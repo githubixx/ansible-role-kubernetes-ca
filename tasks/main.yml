@@ -1,4 +1,7 @@
 ---
+- name: Gather instance facts
+  setup:
+
 - name: Generate list of IP addresses and hostnames needed for Kubernetes API server certificate
   set_fact:
     tmpK8sHosts: |
