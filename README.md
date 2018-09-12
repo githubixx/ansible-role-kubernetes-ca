@@ -1,7 +1,7 @@
 ansible-role-kubernetes-ca
 ==========================
 
-This role is used in [Kubernetes the not so hard way with Ansible (at scaleway) - Part 4 - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-at-scaleway-part-4/). It basically creates two CA's (one for etcd and one for Kubernetes API server) and the certificates needed to secure communication of the Kubernetes components. Besides the Kubernetes API server none of the Kubernetes components should communicate with the etcd cluster directly. For more information see [Kubernetes the not so hard way with Ansible (at scaleway) - Part 4 - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-at-scaleway-part-4/).
+This role is used in [Kubernetes the not so hard way with Ansible - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-certificate-authority/). It basically creates two CA's (one for etcd and one for Kubernetes API server) and the certificates needed to secure communication of the Kubernetes components. Besides the Kubernetes API server none of the Kubernetes components should communicate with the etcd cluster directly. For more information see [Kubernetes the not so hard way with Ansible (at scaleway) - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-certificate-authority/).
 
 Versions
 --------
@@ -10,8 +10,13 @@ I tag every release and try to stay with [semantic versioning](http://semver.org
 
 **r6.0.0_v1.10.4**
 
-- **Potentially BREAKING change**: Remove PeerVPN dependency when generating certificates (use `k8s_interface` variable instead of `peervpn_conf_interface`). When generating certificates previously the values of `peervpn_conf_interface` variables were used and added to the certificate. Now instead `k8s_interface` variable is used. For almost all people that change shouldn't have any effect because the values of both variables should have be the same. If not check if the generated certificates are ok for you. The reason for this change is to allow the usage of a different VPN solution like [WireGuard](https://github.com/githubixx/ansible-role-wireguard) e.g.
+- support Ubuntu 18.04
+
+- Remove PeerVPN dependency when generating certificates (use `k8s_interface` variable instead of `peervpn_conf_interface`). When generating certificates previously the values of `peervpn_conf_interface` variables were used and added to the certificate. Now instead `k8s_interface` variable is used. For almost all people that change shouldn't have any effect because the values of both variables should have been the same. If not check if the generated certificates are ok for you. The reason for this change is to allow the usage of a different VPN solution like [WireGuard](https://github.com/githubixx/ansible-role-wireguard) e.g.
+
 - always gather facts as first task
+
+- update README
 
 **r5.0.0_v1.10.4**
 
