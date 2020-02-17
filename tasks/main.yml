@@ -5,8 +5,7 @@
 - name: Generate list of IP addresses and hostnames needed for Kubernetes API server certificate
   set_fact:
     k8sHosts: >-
-      {% set comma = joiner(",") %}
-      {% for item in groups[k8s_ca_controller] -%}
+      {% set comma = joiner(",") %}{% for item in groups[k8s_ca_controller_nodes_group] -%}
         {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
       {%- endfor %}{% for item in k8s_apiserver_cert_hosts -%}
         {{ comma() }}{{ item }}
@@ -22,8 +21,7 @@
 - name: Generate list of IP addresses and hostnames needed for etcd certificate
   set_fact:
     etcdHosts: >-
-      {% set comma = joiner(",") %}
-      {% for item in groups[k8s_ca_etcd] -%}
+      {% set comma = joiner(",") %}{% for item in groups[k8s_ca_etcd_nodes_group] -%}
         {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
       {%- endfor %}{% for item in etcd_cert_hosts -%}
         {{ comma() }}{{ item }}
@@ -91,8 +89,14 @@
     - kubernetes-ca
 
 - name: Generate the etcd CA and private key
-  shell: cfssl gencert -initca ca-etcd-csr.json | cfssljson -bare ca-etcd
+  shell: >
+    set -o errexit
+    set -o pipefail
+    cfssl gencert \
+      -initca ca-etcd-csr.json \
+    | cfssljson -bare ca-etcd
   args:
+    executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
     creates: "{{ k8s_ca_conf_directory }}/ca-etcd-key.pem"
   tags:
@@ -100,8 +104,14 @@
     - kubernetes-ca-etcd
 
 - name: Generate the Kubernetes API server CA and private key
-  shell: cfssl gencert -initca ca-k8s-apiserver-csr.json | cfssljson -bare ca-k8s-apiserver
+  shell: >
+    set -o errexit
+    set -o pipefail
+    cfssl gencert \
+      -initca ca-k8s-apiserver-csr.json \
+    | cfssljson -bare ca-k8s-apiserver
   args:
+    executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
     creates: "{{ k8s_ca_conf_directory }}/ca-k8s-apiserver-key.pem"
   tags:
@@ -193,8 +203,19 @@
     - kubernetes-ca
 
 - name: Generate TLS certificate for etcd
-  shell: "cfssl gencert -ca=ca-etcd.pem -ca-key=ca-etcd-key.pem -config=ca-etcd-config.json -hostname={{ etcdHosts }} -profile=etcd cert-etcd-csr.json | cfssljson -bare cert-etcd"
+  shell: >
+    set -o errexit
+    set -o pipefail
+    cfssl gencert \
+      -ca=ca-etcd.pem \
+      -ca-key=ca-etcd-key.pem \
+      -config=ca-etcd-config.json \
+      -hostname={{ etcdHosts }} \
+      -profile=etcd \
+      cert-etcd-csr.json \
+    | cfssljson -bare cert-etcd
   args:
+    executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
     creates: "{{ k8s_ca_conf_directory }}/cert-etcd-key.pem"
   tags:
@@ -202,24 +223,55 @@
     - kubernetes-ca-etcd
 
 - name: Generate TLS certificate for Kubernetes API server
-  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -hostname={{ k8sHosts }} -profile=kubernetes cert-k8s-apiserver-csr.json | cfssljson -bare cert-k8s-apiserver"
+  shell: >
+    set -o errexit
+    set -o pipefail
+    cfssl gencert \
+      -ca=ca-k8s-apiserver.pem \
+      -ca-key=ca-k8s-apiserver-key.pem \
+      -config=ca-k8s-apiserver-config.json \
+      -hostname={{ k8sHosts }} \
+      -profile=kubernetes \
+      cert-k8s-apiserver-csr.json \
+    | cfssljson -bare cert-k8s-apiserver
   args:
+    executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
     creates: "{{ k8s_ca_conf_directory }}/cert-k8s-apiserver-key.pem"
   tags:
     - kubernetes-ca
 
 - name: Generate TLS certificate for admin user
-  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-admin-csr.json | cfssljson -bare cert-admin"
+  shell: >
+    set -o errexit
+    set -o pipefail
+    cfssl gencert \
+      -ca=ca-k8s-apiserver.pem \
+      -ca-key=ca-k8s-apiserver-key.pem \
+      -config=ca-k8s-apiserver-config.json \
+      -profile=kubernetes cert-admin-csr.json \
+    | cfssljson -bare cert-admin
   args:
+    executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
     creates: "{{ k8s_ca_conf_directory }}/cert-admin-key.pem"
   tags:
     - kubernetes-ca
 
 - name: Generate TLS certificates for Kubernetes worker hosts
-  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -hostname={{ hostvars[item]['ansible_hostname'] }},{{ hostvars[item]['ansible_default_ipv4']['address'] }},{{ hostvars[item]['ansible_'+hostvars[item]['k8s_interface']].ipv4.address }} -profile=kubernetes cert-{{ item }}-csr.json | cfssljson -bare cert-{{ item }}"
+  shell: >
+    set -o errexit
+    set -o pipefail
+    cfssl gencert \
+      -ca=ca-k8s-apiserver.pem \
+      -ca-key=ca-k8s-apiserver-key.pem \
+      -config=ca-k8s-apiserver-config.json \
+      -hostname={{ hostvars[item]['ansible_hostname'] }},{{ hostvars[item]['ansible_default_ipv4']['address'] }},{{ hostvars[item]['ansible_'+hostvars[item]['k8s_interface']].ipv4.address }} \
+      -profile=kubernetes \
+      cert-{{ item }}-csr.json \
+    | cfssljson -bare cert-{{ item }}
   args:
+    executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
     creates: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-key.pem"
   with_inventory_hostnames:
@@ -228,32 +280,72 @@
     - kubernetes-ca
 
 - name: Generate TLS certificate for kube-proxy
-  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-k8s-proxy-csr.json | cfssljson -bare cert-k8s-proxy"
+  shell: >
+    set -o errexit
+    set -o pipefail
+    cfssl gencert \
+      -ca=ca-k8s-apiserver.pem \
+      -ca-key=ca-k8s-apiserver-key.pem \
+      -config=ca-k8s-apiserver-config.json \
+      -profile=kubernetes \
+      cert-k8s-proxy-csr.json \
+    | cfssljson -bare cert-k8s-proxy
   args:
+    executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
     creates: "{{ k8s_ca_conf_directory }}/cert-k8s-proxy-key.pem"
   tags:
     - kubernetes-ca
 
 - name: Generate TLS certificate for kube-controller-manager
-  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-k8s-controller-manager-csr.json | cfssljson -bare cert-k8s-controller-manager"
+  shell: >
+    set -o errexit
+    set -o pipefail
+    cfssl gencert \
+      -ca=ca-k8s-apiserver.pem \
+      -ca-key=ca-k8s-apiserver-key.pem \
+      -config=ca-k8s-apiserver-config.json \
+      -profile=kubernetes \
+      cert-k8s-controller-manager-csr.json \
+    | cfssljson -bare cert-k8s-controller-manager
   args:
+    executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
     creates: "{{ k8s_ca_conf_directory }}/cert-k8s-controller-manager-key.pem"
   tags:
     - kubernetes-ca
 
 - name: Generate TLS certificate for kube-controller-manager service account
-  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-k8s-controller-manager-sa-csr.json | cfssljson -bare cert-k8s-controller-manager-sa"
+  shell: >
+    set -o errexit
+    set -o pipefail
+    cfssl gencert \
+      -ca=ca-k8s-apiserver.pem \
+      -ca-key=ca-k8s-apiserver-key.pem \
+      -config=ca-k8s-apiserver-config.json \
+      -profile=kubernetes \
+      cert-k8s-controller-manager-sa-csr.json \
+    | cfssljson -bare cert-k8s-controller-manager-sa
   args:
+    executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
     creates: "{{ k8s_ca_conf_directory }}/cert-k8s-controller-manager-sa-key.pem"
   tags:
     - kubernetes-ca
 
 - name: Generate TLS certificate for kube-scheduler
-  shell: "cfssl gencert -ca=ca-k8s-apiserver.pem -ca-key=ca-k8s-apiserver-key.pem -config=ca-k8s-apiserver-config.json -profile=kubernetes cert-k8s-scheduler-csr.json | cfssljson -bare cert-k8s-scheduler"
+  shell: >
+    set -o errexit
+    set -o pipefail
+    cfssl gencert \
+      -ca=ca-k8s-apiserver.pem \
+      -ca-key=ca-k8s-apiserver-key.pem \
+      -config=ca-k8s-apiserver-config.json \
+      -profile=kubernetes \
+      cert-k8s-scheduler-csr.json \
+    | cfssljson -bare cert-k8s-scheduler
   args:
+    executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
     creates: "{{ k8s_ca_conf_directory }}/cert-k8s-scheduler-key.pem"
   tags:
