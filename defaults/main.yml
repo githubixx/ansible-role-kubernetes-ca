@@ -131,4 +131,5 @@ k8s_apiserver_cert_hosts:
   - kubernetes
   - kubernetes.default
   - kubernetes.default.svc
+  - kubernetes.default.svc.cluster
   - kubernetes.default.svc.cluster.local
