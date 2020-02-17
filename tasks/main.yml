@@ -9,9 +9,6 @@
       {% for item in groups["k8s_controller"] -%}
         {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
       {%- endfor %}
-      {% for item in groups["k8s_worker"] -%}
-        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
-      {%- endfor %}
       {% for item in k8s_apiserver_cert_hosts -%}
         {{ comma() }}{{ item }}
       {%- endfor %}
@@ -61,7 +58,7 @@
     path: "{{ k8s_ca_conf_directory }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0755
+    mode: "{{ k8s_ca_conf_directory_perm }}"
     state: directory
   tags:
     - kubernetes-ca
@@ -72,7 +69,7 @@
     dest: "{{ k8s_ca_conf_directory }}/ca-etcd-config.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0600
+    mode: "{{ k8s_ca_file_perm }}"
   tags:
     - kubernetes-ca
     - kubernetes-ca-etcd
@@ -83,7 +80,7 @@
     dest: "{{ k8s_ca_conf_directory }}/ca-k8s-apiserver-config.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0600
+    mode: "{{ k8s_ca_file_perm }}"
   tags:
     - kubernetes-ca
 
@@ -93,7 +90,7 @@
     dest: "{{ k8s_ca_conf_directory }}/ca-etcd-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0600
+    mode: "{{ k8s_ca_file_perm }}"
   tags:
     - kubernetes-ca
     - kubernetes-ca-etcd
@@ -104,7 +101,7 @@
     dest: "{{ k8s_ca_conf_directory }}/ca-k8s-apiserver-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0600
+    mode: "{{ k8s_ca_file_perm }}"
   tags:
     - kubernetes-ca
 
@@ -131,7 +128,7 @@
     dest: "{{ k8s_ca_conf_directory }}/cert-etcd-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0600
+    mode: "{{ k8s_ca_file_perm }}"
   tags:
     - kubernetes-ca
     - kubernetes-ca-etcd
@@ -142,7 +139,7 @@
     dest: "{{ k8s_ca_conf_directory }}/cert-k8s-apiserver-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0600
+    mode: "{{ k8s_ca_file_perm }}"
   tags:
     - kubernetes-ca
 
@@ -152,7 +149,7 @@
     dest: "{{ k8s_ca_conf_directory }}/cert-admin-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0600
+    mode: "{{ k8s_ca_file_perm }}"
   tags:
     - kubernetes-ca
 
@@ -162,7 +159,7 @@
     dest: "{{ k8s_ca_conf_directory }}/cert-k8s-proxy-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0600
+    mode: "{{ k8s_ca_file_perm }}"
   tags:
     - kubernetes-ca
 
@@ -172,7 +169,7 @@
     dest: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0600
+    mode: "{{ k8s_ca_file_perm }}"
   with_inventory_hostnames:
     - k8s_worker
   vars:
@@ -186,7 +183,7 @@
     dest: "{{ k8s_ca_conf_directory }}/cert-k8s-controller-manager-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0600
+    mode: "{{ k8s_ca_file_perm }}"
   tags:
     - kubernetes-ca
 
@@ -196,7 +193,7 @@
     dest: "{{ k8s_ca_conf_directory }}/cert-k8s-controller-manager-sa-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0600
+    mode: "{{ k8s_ca_file_perm }}"
   tags:
     - kubernetes-ca
 
@@ -206,7 +203,7 @@
     dest: "{{ k8s_ca_conf_directory }}/cert-k8s-scheduler-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
-    mode: 0600
+    mode: "{{ k8s_ca_file_perm }}"
   tags:
     - kubernetes-ca
 

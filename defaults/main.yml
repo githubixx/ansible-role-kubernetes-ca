@@ -5,6 +5,8 @@
 # "/home/da_user" then "k8s_ca_conf_directory" will have a value of
 # "/home/da_user/k8s/certs".
 k8s_ca_conf_directory: "{{ '~/k8s/certs' | expanduser }}"
+k8s_ca_conf_directory_perm: "0770"
+k8s_ca_file_perm: "0660"
 k8s_ca_certificate_owner: "root"
 k8s_ca_certificate_group: "root"
 
