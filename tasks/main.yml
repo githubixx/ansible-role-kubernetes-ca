@@ -4,20 +4,13 @@
 
 - name: Generate list of IP addresses and hostnames needed for Kubernetes API server certificate
   set_fact:
-    tmpK8sHosts: |
+    k8sHosts: >-
       {% set comma = joiner(",") %}
-      {% for item in groups["k8s_controller"] -%}
+      {% for item in groups[k8s_ca_controller] -%}
         {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
-      {%- endfor %}
-      {% for item in k8s_apiserver_cert_hosts -%}
+      {%- endfor %}{% for item in k8s_apiserver_cert_hosts -%}
         {{ comma() }}{{ item }}
       {%- endfor %}
-  tags:
-    - kubernetes-ca
-
-- name: Remove newline from controller hosts list
-  set_fact:
-    k8sHosts: "{{ tmpK8sHosts |replace('\n', '') }}"
   tags:
     - kubernetes-ca
 
@@ -28,21 +21,13 @@
 
 - name: Generate list of IP addresses and hostnames needed for etcd certificate
   set_fact:
-    tmpEtcdHosts: |
+    etcdHosts: >-
       {% set comma = joiner(",") %}
-      {% for item in groups["k8s_etcd"] -%}
+      {% for item in groups[k8s_ca_etcd] -%}
         {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
-      {%- endfor %}
-      {% for item in etcd_cert_hosts -%}
+      {%- endfor %}{% for item in etcd_cert_hosts -%}
         {{ comma() }}{{ item }}
       {%- endfor %}
-  tags:
-    - kubernetes-ca
-    - kubernetes-ca-etcd
-
-- name: Remove newline from etcd hosts list
-  set_fact:
-    etcdHosts: "{{ tmpEtcdHosts |replace('\n', '') }}"
   tags:
     - kubernetes-ca
     - kubernetes-ca-etcd

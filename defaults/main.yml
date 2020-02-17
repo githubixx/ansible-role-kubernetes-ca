@@ -10,6 +10,9 @@ k8s_ca_file_perm: "0660"
 k8s_ca_certificate_owner: "root"
 k8s_ca_certificate_group: "root"
 
+k8s_ca_controller: "k8s_controller"
+k8s_ca_etcd: "k8s_etcd"
+
 # Expiry for etcd root certificate
 ca_etcd_expiry: "87600h"
 
