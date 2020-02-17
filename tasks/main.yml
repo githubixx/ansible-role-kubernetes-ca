@@ -156,7 +156,7 @@
     group: "{{ k8s_ca_certificate_group }}"
     mode: "{{ k8s_ca_file_perm }}"
   with_inventory_hostnames:
-    - k8s_worker
+    - "{{ k8s_ca_worker_nodes_group }}"
   vars:
     - workerHost: "{{ item }}"
   tags:
@@ -223,7 +223,7 @@
     chdir: "{{ k8s_ca_conf_directory }}"
     creates: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-key.pem"
   with_inventory_hostnames:
-    - k8s_worker
+    - "{{ k8s_ca_worker_nodes_group }}"
   tags:
     - kubernetes-ca
 
