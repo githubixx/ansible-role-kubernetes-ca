@@ -2,7 +2,7 @@
   "CN": "system:node:{{ hostvars[workerHost]['ansible_hostname'] }}",
   "key": {
     "algo": "{{ k8s_worker_csr_key_algo }}",
-    "size": "{{ k8s_worker_csr_key_size }}"
+    "size": {{ k8s_worker_csr_key_size }}
   },
   "names": [
     {
