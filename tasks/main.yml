@@ -88,10 +88,10 @@
   tags:
     - kubernetes-ca
 
-- name: Generate the etcd CA and private key
+- name: Generate the etcd certificate authority (CA) and private key
   shell: >
-    set -o errexit
-    set -o pipefail
+    set -o errexit; \
+    set -o pipefail; \
     cfssl gencert \
       -initca ca-etcd-csr.json \
     | cfssljson -bare ca-etcd
@@ -103,10 +103,23 @@
     - kubernetes-ca
     - kubernetes-ca-etcd
 
-- name: Generate the Kubernetes API server CA and private key
+- name: Set file permissions for etcd CA and private key file
+  file:
+    path: "{{ k8s_ca_conf_directory }}/{{ item }}"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  loop:
+    - ca-etcd.pem
+    - ca-etcd-key.pem
+    - ca-etcd.csr
+
+- name: Generate Kubernetes API server certificate authority (CA) and private key
   shell: >
-    set -o errexit
-    set -o pipefail
+    set -o errexit; \
+    set -o pipefail; \
     cfssl gencert \
       -initca ca-k8s-apiserver-csr.json \
     | cfssljson -bare ca-k8s-apiserver
@@ -116,6 +129,19 @@
     creates: "{{ k8s_ca_conf_directory }}/ca-k8s-apiserver-key.pem"
   tags:
     - kubernetes-ca
+
+- name: Set file permissions for Kubernetes API server CA and private key
+  file:
+    path: "{{ k8s_ca_conf_directory }}/{{ item }}"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  loop:
+    - ca-k8s-apiserver.pem
+    - ca-k8s-apiserver-key.pem
+    - ca-k8s-apiserver.csr
 
 - name: Create the etcd key CSR file
   template:
@@ -204,8 +230,8 @@
 
 - name: Generate TLS certificate for etcd
   shell: >
-    set -o errexit
-    set -o pipefail
+    set -o errexit; \
+    set -o pipefail; \
     cfssl gencert \
       -ca=ca-etcd.pem \
       -ca-key=ca-etcd-key.pem \
@@ -222,10 +248,23 @@
     - kubernetes-ca
     - kubernetes-ca-etcd
 
+- name: Set file permissions for etcd certificate files
+  file:
+    path: "{{ k8s_ca_conf_directory }}/{{ item }}"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  loop:
+    - cert-etcd.pem
+    - cert-etcd-key.pem
+    - cert-etcd.csr
+
 - name: Generate TLS certificate for Kubernetes API server
   shell: >
-    set -o errexit
-    set -o pipefail
+    set -o errexit; \
+    set -o pipefail; \
     cfssl gencert \
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
@@ -241,10 +280,23 @@
   tags:
     - kubernetes-ca
 
+- name: Set file permissions for Kubernetes API server certificate files
+  file:
+    path: "{{ k8s_ca_conf_directory }}/{{ item }}"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  loop:
+    - cert-k8s-apiserver.pem
+    - cert-k8s-apiserver-key.pem
+    - cert-k8s-apiserver.csr
+
 - name: Generate TLS certificate for admin user
   shell: >
-    set -o errexit
-    set -o pipefail
+    set -o errexit; \
+    set -o pipefail; \
     cfssl gencert \
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
@@ -258,10 +310,23 @@
   tags:
     - kubernetes-ca
 
-- name: Generate TLS certificates for Kubernetes worker hosts
+- name: Set file permissions for admin user certificate files
+  file:
+    path: "{{ k8s_ca_conf_directory }}/{{ item }}"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  loop:
+    - cert-admin.pem
+    - cert-admin-key.pem
+    - cert-admin.csr
+
+- name: Generate TLS certificates for Kubernetes worker hosts (kubelet)
   shell: >
-    set -o errexit
-    set -o pipefail
+    set -o errexit; \
+    set -o pipefail; \
     cfssl gencert \
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
@@ -279,10 +344,49 @@
   tags:
     - kubernetes-ca
 
+- name: Set file permissions for Kubernetes worker certificate files (1/3)
+  file:
+    path: "{{ k8s_ca_conf_directory }}/cert-{{ item }}.pem"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  with_inventory_hostnames:
+    - "{{ k8s_ca_worker_nodes_group }}"
+  tags:
+    - kubernetes-ca
+
+- name: Set file permissions for Kubernetes worker certificate files (2/3)
+  file:
+    path: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-key.pem"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  with_inventory_hostnames:
+    - "{{ k8s_ca_worker_nodes_group }}"
+  tags:
+    - kubernetes-ca
+
+- name: Set file permissions for Kubernetes worker certificate files (3/3)
+  file:
+    path: "{{ k8s_ca_conf_directory }}/cert-{{ item }}.csr"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  with_inventory_hostnames:
+    - "{{ k8s_ca_worker_nodes_group }}"
+  tags:
+    - kubernetes-ca
+
 - name: Generate TLS certificate for kube-proxy
   shell: >
-    set -o errexit
-    set -o pipefail
+    set -o errexit; \
+    set -o pipefail; \
     cfssl gencert \
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
@@ -297,10 +401,24 @@
   tags:
     - kubernetes-ca
 
+- name: Set file permissions for kube-proxy certificate files
+  file:
+    path: "{{ k8s_ca_conf_directory }}/{{ item }}"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  loop:
+    - cert-k8s-proxy.pem
+    - cert-k8s-proxy-key.pem
+    - cert-k8s-proxy.csr
+
+
 - name: Generate TLS certificate for kube-controller-manager
   shell: >
-    set -o errexit
-    set -o pipefail
+    set -o errexit; \
+    set -o pipefail; \
     cfssl gencert \
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
@@ -315,10 +433,23 @@
   tags:
     - kubernetes-ca
 
+- name: Set file permissions for kube-controller-manager certificate files
+  file:
+    path: "{{ k8s_ca_conf_directory }}/{{ item }}"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  loop:
+    - cert-k8s-controller-manager.pem
+    - cert-k8s-controller-manager-key.pem
+    - cert-k8s-controller-manager.csr
+
 - name: Generate TLS certificate for kube-controller-manager service account
   shell: >
-    set -o errexit
-    set -o pipefail
+    set -o errexit; \
+    set -o pipefail; \
     cfssl gencert \
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
@@ -333,10 +464,23 @@
   tags:
     - kubernetes-ca
 
+- name: Set file permissions for kube-controller-manager service account certificate files
+  file:
+    path: "{{ k8s_ca_conf_directory }}/{{ item }}"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  loop:
+    - cert-k8s-controller-manager-sa.pem
+    - cert-k8s-controller-manager-sa-key.pem
+    - cert-k8s-controller-manager-sa.csr
+
 - name: Generate TLS certificate for kube-scheduler
   shell: >
-    set -o errexit
-    set -o pipefail
+    set -o errexit; \
+    set -o pipefail; \
     cfssl gencert \
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
@@ -350,3 +494,16 @@
     creates: "{{ k8s_ca_conf_directory }}/cert-k8s-scheduler-key.pem"
   tags:
     - kubernetes-ca
+
+- name: Set file permissions for kube-scheduler certificate files
+  file:
+    path: "{{ k8s_ca_conf_directory }}/{{ item }}"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  loop:
+    - cert-k8s-scheduler.pem
+    - cert-k8s-scheduler-key.pem
+    - cert-k8s-scheduler.csr
