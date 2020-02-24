@@ -24,9 +24,28 @@ Role Variables
 This playbook has quite a few variables. But that's mainly information needed for the certificates.
 
 ```
+# The directory from where to copy the K8s certificates. By default this
+# will expand to user's LOCAL $HOME (the user that run's "ansible-playbook ..."
+# plus "/k8s/certs". That means if the user's $HOME directory is e.g.
+# "/home/da_user" then "k8s_ca_conf_directory" will have a value of
+# "/home/da_user/k8s/certs".
 k8s_ca_conf_directory: "{{ '~/k8s/certs' | expanduser }}"
+# Directory permissions for directory specified in "k8s_ca_conf_directory"
+k8s_ca_conf_directory_perm: "0770"
+# File permissions for certificate's, csr's, and so on
+k8s_ca_file_perm: "0660"
+# Owner of the certificate files
 k8s_ca_certificate_owner: "root"
+# Group to which the certificate files belongs to
 k8s_ca_certificate_group: "root"
+
+# Specifies Ansible's hosts group which contains all K8s controller
+# nodes (as specified in Ansible's "hosts" file).
+k8s_ca_controller_nodes_group: "k8s_controller"
+# As above but for the K8s etcd nodes.
+k8s_ca_etcd_nodes_group: "k8s_etcd"
+# As above but for the K8s worker nodes.
+k8s_ca_worker_nodes_group: "k8s_worker"
 ```
 
 `k8s_ca_conf_directory` tells Ansible where to store the CA's and certificate files. To enable Ansible to read the files in later runs you should specify a user and group in `k8s_ca_certificate_owner` / `k8s_ca_certificate_group` which has permissions (in most cases this will be the user you use on your workstation).
@@ -174,6 +193,7 @@ k8s_apiserver_cert_hosts:
   - kubernetes
   - kubernetes.default
   - kubernetes.default.svc
+  - kubernetes.default.svc.cluster
   - kubernetes.default.svc.cluster.local
 ```
 Here the same is basically true as with `etcd_cert_hosts` but we also include the Kubernetes service IP `10.32.0.1` (which you will get BTW if you execute `nslookup kubernetes` later in one of the pods). We also include 127.0.0.1 (localhost) and we include some default Kubernetes hostname's that are available by default if KubeDNS is deployed.

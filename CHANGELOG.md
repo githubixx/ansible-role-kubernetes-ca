@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+**8.0.0+1.16.3**
+
+- introduced a few new variables: `k8s_ca_conf_directory_perm`, `k8s_ca_file_perm`, `k8s_ca_controller_nodes_group`, `k8s_ca_etcd_nodes_group`, `k8s_ca_worker_nodes_group`. Values were previously hard coded. They can be adjusted now.
+- added `kubernetes.default.svc.cluster` to `k8s_apiserver_cert_hosts`
+- removed worker hostnames and IPs from kube-apiserver certificate. They are not needed here.
+- better formatting of shell scripts in .yaml files.
+
 **7.0.0+1.12.3**
 
 - use correct semantic versioning as described in https://semver.org. Needed for Ansible Galaxy importer as it now insists on using semantic versioning.
