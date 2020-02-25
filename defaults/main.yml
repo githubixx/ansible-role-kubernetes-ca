@@ -1,5 +1,5 @@
 ---
-# The directory from where to copy the K8s certificates. By default this
+# The directory where to store the certificates. By default this
 # will expand to user's LOCAL $HOME (the user that run's "ansible-playbook ..."
 # plus "/k8s/certs". That means if the user's $HOME directory is e.g.
 # "/home/da_user" then "k8s_ca_conf_directory" will have a value of
@@ -7,7 +7,7 @@
 k8s_ca_conf_directory: "{{ '~/k8s/certs' | expanduser }}"
 # Directory permissions for directory specified in "k8s_ca_conf_directory"
 k8s_ca_conf_directory_perm: "0770"
-# File permissions for certificate's, csr's, and so on
+# File permissions for certificates, csr, and so on
 k8s_ca_file_perm: "0660"
 # Owner of the certificate files
 k8s_ca_certificate_owner: "root"
