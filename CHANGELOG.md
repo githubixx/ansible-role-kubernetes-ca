@@ -7,6 +7,7 @@ CHANGELOG
 - added `kubernetes.default.svc.cluster` to `k8s_apiserver_cert_hosts`
 - removed worker hostnames and IPs from kube-apiserver certificate. They are not needed here.
 - better formatting of shell scripts in .yaml files.
+- gather facts of K8s hosts as first task
 
 **7.0.0+1.12.3**
 
