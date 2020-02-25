@@ -1,16 +1,16 @@
 {
-  "CN": "system:node:{{hostvars[workerHost]['ansible_hostname']}}",
+  "CN": "system:node:{{ hostvars[workerHost]['ansible_hostname'] }}",
   "key": {
-    "algo": "{{k8s_worker_csr_key_algo}}",
-    "size": {{k8s_worker_csr_key_size}}
+    "algo": "{{ k8s_worker_csr_key_algo }}",
+    "size": {{ k8s_worker_csr_key_size }}
   },
   "names": [
     {
-      "C": "{{k8s_worker_csr_names_c}}",
-      "L": "{{k8s_worker_csr_names_l}}",
-      "O": "{{k8s_worker_csr_names_o}}",
-      "OU": "{{k8s_worker_csr_names_ou}}",
-      "ST": "{{k8s_worker_csr_names_st}}"
+      "C": "{{ k8s_worker_csr_names_c }}",
+      "L": "{{ k8s_worker_csr_names_l }}",
+      "O": "{{ k8s_worker_csr_names_o }}",
+      "OU": "{{ k8s_worker_csr_names_ou }}",
+      "ST": "{{ k8s_worker_csr_names_st }}"
     }
   ]
 }
