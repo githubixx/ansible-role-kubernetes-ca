@@ -1,6 +1,9 @@
 ---
 - name: Gather instance facts
   setup:
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  loop: "{{ groups[k8s_ca_controller_nodes_group] | union(groups[k8s_ca_worker_nodes_group]) | union(groups[k8s_ca_etcd_nodes_group]) }}"
 
 - name: Generate list of IP addresses and hostnames needed for Kubernetes API server certificate
   set_fact:
