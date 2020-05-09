@@ -1,6 +1,24 @@
 CHANGELOG
 ---------
 
+**no changes**
+
+- delted old tags not compatible with Ansible Galaxy:
+
+```
+r1.0.0_v1.6.0
+r1.0.1_v1.8.0
+r3.0.0_v1.8.4
+r4.0.0_v1.8.4
+r4.0.1_v1.8.4
+r4.0.1_v1.9.3
+r4.0.1_v1.9.8
+r5.0.0_v1.10.4
+r6.0.0_v1.10.4
+```
+
+These versions are outdated anyways.
+
 **8.0.0+1.16.3**
 
 - introduced a few new variables: `k8s_ca_conf_directory_perm`, `k8s_ca_file_perm`, `k8s_ca_controller_nodes_group`, `k8s_ca_etcd_nodes_group`, `k8s_ca_worker_nodes_group`. Values were previously hard coded. They can be adjusted now.
