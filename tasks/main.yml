@@ -264,6 +264,39 @@
     - cert-etcd-server-key.pem
     - cert-etcd-server.csr
 
+- name: Generate TLS peer certificate for etcd
+  shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    cfssl gencert \
+      -ca=ca-etcd.pem \
+      -ca-key=ca-etcd-key.pem \
+      -config=ca-etcd-config.json \
+      -hostname={{ etcdHosts }} \
+      -profile=etcd-peer \
+      cert-etcd-peer-csr.json \
+    | cfssljson -bare cert-etcd-peer
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ k8s_ca_conf_directory }}"
+    creates: "{{ k8s_ca_conf_directory }}/cert-etcd-peer-key.pem"
+  tags:
+    - kubernetes-ca
+    - kubernetes-ca-etcd
+
+- name: Set file permissions for etcd peer certificate files
+  file:
+    path: "{{ k8s_ca_conf_directory }}/{{ item }}"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  loop:
+    - cert-etcd-peer.pem
+    - cert-etcd-peer-key.pem
+    - cert-etcd-peer.csr
+
 - name: Generate TLS certificate for Kubernetes API server
   shell: >
     set -o errexit; \
