@@ -70,7 +70,7 @@
   tags:
     - kubernetes-ca
 
-- name: Copy the etcd CA certificate request file (CSR)
+- name: Create the etcd CA certificate request file (CSR)
   template:
     src: "ca-etcd-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/ca-etcd-csr.json"
@@ -81,7 +81,7 @@
     - kubernetes-ca
     - kubernetes-ca-etcd
 
-- name: Copy the Kubernetes API server CA certificate request file (CSR)
+- name: Create the Kubernetes API server CA certificate request file (CSR)
   template:
     src: "ca-k8s-apiserver-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/ca-k8s-apiserver-csr.json"
