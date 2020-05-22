@@ -1,12 +1,12 @@
 ansible-role-kubernetes-ca
 ==========================
 
-This role is used in [Kubernetes the not so hard way with Ansible - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-certificate-authority/). It basically creates two CA's (one for etcd and one for Kubernetes API server) and the certificates needed to secure communication of the Kubernetes components. Besides the Kubernetes API server none of the Kubernetes components should communicate with the etcd cluster directly. For more information see [Kubernetes the not so hard way with Ansible - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-certificate-authority/).
+This role is used in [Kubernetes the not so hard way with Ansible - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-certificate-authority/). It basically creates two CA's: One for etcd and one for Kubernetes components (needed to secure communication of the Kubernetes components). Besides the Kubernetes API server none of the Kubernetes components should have a need to communicate with the etcd cluster directly. For infrastructure components like [Cilium](https://cilium.io/) for K8s networking or [Traefik](https://traefik.io) for ingress it may make sense to reuse the already existing etcd cluster. For more information see [Kubernetes the not so hard way with Ansible - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-certificate-authority/).
 
 Versions
 --------
 
-I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `7.0.0+1.12.3` means this is release 7.0.0 of this role and it's meant to be used with Kubernetes version `1.12.3` (while normally it should work with basically any version >= 1.8.0 but I tested it with the version tagged). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase and also the role patch version will increase (e.g. from `7.0.0` to `7.0.1`). This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release.
+I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `8.0.0+1.16.3` means this is release 8.0.0 of this role and it's meant to be used with Kubernetes version `1.16.3` (while normally it should work with basically any Kubernetes version >= 1.8.0 but I tested it with the version tagged). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase and also the role patch version will increase (e.g. from `8.0.0` to `8.0.1`). This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release.
 
 Changelog
 ---------
@@ -30,20 +30,26 @@ This playbook has quite a few variables. But that's mainly information needed fo
 # "/home/da_user" then "k8s_ca_conf_directory" will have a value of
 # "/home/da_user/k8s/certs".
 k8s_ca_conf_directory: "{{ '~/k8s/certs' | expanduser }}"
+
 # Directory permissions for directory specified in "k8s_ca_conf_directory"
 k8s_ca_conf_directory_perm: "0770"
+
 # File permissions for certificates, csr, and so on
 k8s_ca_file_perm: "0660"
+
 # Owner of the certificate files
 k8s_ca_certificate_owner: "root"
+
 # Group to which the certificate files belongs to
 k8s_ca_certificate_group: "root"
 
 # Specifies Ansible's hosts group which contains all K8s controller
 # nodes (as specified in Ansible's "hosts" file).
 k8s_ca_controller_nodes_group: "k8s_controller"
+
 # As above but for the K8s etcd nodes.
 k8s_ca_etcd_nodes_group: "k8s_etcd"
+
 # As above but for the K8s worker nodes.
 k8s_ca_worker_nodes_group: "k8s_worker"
 ```
