@@ -135,9 +135,6 @@ k8s_controller_manager_sa_csr_names_st: "Bayern"
 
 etcd_cert_hosts:
   - 127.0.0.1
-  - etcd0
-  - etcd1
-  - etcd2
 
 k8s_apiserver_cert_hosts:
   - 127.0.0.1
