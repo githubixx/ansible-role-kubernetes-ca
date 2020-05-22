@@ -135,8 +135,10 @@ k8s_controller_manager_sa_csr_names_st: "Bayern"
 
 etcd_cert_hosts:
   - 127.0.0.1
+  - localhost
 
 k8s_apiserver_cert_hosts:
+  - localhost
   - 127.0.0.1
   - 10.32.0.1
   - kubernetes
