@@ -231,7 +231,7 @@
   tags:
     - kubernetes-ca
 
-- name: Generate TLS certificate for etcd
+- name: Generate TLS server certificate for etcd
   shell: >
     set -o errexit; \
     set -o pipefail; \
@@ -241,17 +241,17 @@
       -config=ca-etcd-config.json \
       -hostname={{ etcdHosts }} \
       -profile=etcd-server \
-      cert-etcd-csr.json \
-    | cfssljson -bare cert-etcd
+      cert-etcd-server-csr.json \
+    | cfssljson -bare cert-etcd-server
   args:
     executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
-    creates: "{{ k8s_ca_conf_directory }}/cert-etcd-key.pem"
+    creates: "{{ k8s_ca_conf_directory }}/cert-etcd-server-key.pem"
   tags:
     - kubernetes-ca
     - kubernetes-ca-etcd
 
-- name: Set file permissions for etcd certificate files
+- name: Set file permissions for etcd server certificate files
   file:
     path: "{{ k8s_ca_conf_directory }}/{{ item }}"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -260,9 +260,9 @@
     modification_time: "preserve"
     access_time: "preserve"
   loop:
-    - cert-etcd.pem
-    - cert-etcd-key.pem
-    - cert-etcd.csr
+    - cert-etcd-server.pem
+    - cert-etcd-server-key.pem
+    - cert-etcd-server.csr
 
 - name: Generate TLS certificate for Kubernetes API server
   shell: >
