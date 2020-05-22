@@ -240,7 +240,7 @@
       -ca-key=ca-etcd-key.pem \
       -config=ca-etcd-config.json \
       -hostname={{ etcdHosts }} \
-      -profile=etcd \
+      -profile=etcd-server \
       cert-etcd-csr.json \
     | cfssljson -bare cert-etcd
   args:
