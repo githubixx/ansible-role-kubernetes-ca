@@ -1,0 +1,16 @@
+{
+  "CN": "{{ etcd_server_csr_cn }}",
+  "key": {
+    "algo": "{{ etcd_server_csr_key_algo }}",
+    "size": {{ etcd_server_csr_key_size }}
+  },
+  "names": [
+    {
+      "C": "{{ etcd_server_csr_names_c }}",
+      "L": "{{ etcd_server_csr_names_l }}",
+      "O": "{{ etcd_server_csr_names_o }}",
+      "OU": "{{ etcd_server_csr_names_ou }}",
+      "ST": "{{ etcd_server_csr_names_st }}"
+    }
+  ]
+}

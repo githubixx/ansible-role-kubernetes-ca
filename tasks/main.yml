@@ -70,7 +70,7 @@
   tags:
     - kubernetes-ca
 
-- name: Copy the etcd CA certificate request file (CSR)
+- name: Create the etcd CA certificate request file (CSR)
   template:
     src: "ca-etcd-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/ca-etcd-csr.json"
@@ -81,7 +81,7 @@
     - kubernetes-ca
     - kubernetes-ca-etcd
 
-- name: Copy the Kubernetes API server CA certificate request file (CSR)
+- name: Create the Kubernetes API server CA certificate request file (CSR)
   template:
     src: "ca-k8s-apiserver-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/ca-k8s-apiserver-csr.json"
@@ -146,10 +146,21 @@
     - ca-k8s-apiserver-key.pem
     - ca-k8s-apiserver.csr
 
-- name: Create the etcd key CSR file
+- name: Create the etcd server CSR file
   template:
-    src: "cert-etcd-csr.json.j2"
-    dest: "{{ k8s_ca_conf_directory }}/cert-etcd-csr.json"
+    src: "cert-etcd-server-csr.json.j2"
+    dest: "{{ k8s_ca_conf_directory }}/cert-etcd-server-csr.json"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: "{{ k8s_ca_file_perm }}"
+  tags:
+    - kubernetes-ca
+    - kubernetes-ca-etcd
+
+- name: Create the etcd peer CSR file
+  template:
+    src: "cert-etcd-peer-csr.json.j2"
+    dest: "{{ k8s_ca_conf_directory }}/cert-etcd-peer-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
     mode: "{{ k8s_ca_file_perm }}"
@@ -231,7 +242,7 @@
   tags:
     - kubernetes-ca
 
-- name: Generate TLS certificate for etcd
+- name: Generate TLS server certificate for etcd
   shell: >
     set -o errexit; \
     set -o pipefail; \
@@ -240,18 +251,18 @@
       -ca-key=ca-etcd-key.pem \
       -config=ca-etcd-config.json \
       -hostname={{ etcdHosts }} \
-      -profile=etcd \
-      cert-etcd-csr.json \
-    | cfssljson -bare cert-etcd
+      -profile=server \
+      cert-etcd-server-csr.json \
+    | cfssljson -bare cert-etcd-server
   args:
     executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
-    creates: "{{ k8s_ca_conf_directory }}/cert-etcd-key.pem"
+    creates: "{{ k8s_ca_conf_directory }}/cert-etcd-server-key.pem"
   tags:
     - kubernetes-ca
     - kubernetes-ca-etcd
 
-- name: Set file permissions for etcd certificate files
+- name: Set file permissions for etcd server certificate files
   file:
     path: "{{ k8s_ca_conf_directory }}/{{ item }}"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -260,9 +271,42 @@
     modification_time: "preserve"
     access_time: "preserve"
   loop:
-    - cert-etcd.pem
-    - cert-etcd-key.pem
-    - cert-etcd.csr
+    - cert-etcd-server.pem
+    - cert-etcd-server-key.pem
+    - cert-etcd-server.csr
+
+- name: Generate TLS peer certificate for etcd
+  shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    cfssl gencert \
+      -ca=ca-etcd.pem \
+      -ca-key=ca-etcd-key.pem \
+      -config=ca-etcd-config.json \
+      -hostname={{ etcdHosts }} \
+      -profile=peer \
+      cert-etcd-peer-csr.json \
+    | cfssljson -bare cert-etcd-peer
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ k8s_ca_conf_directory }}"
+    creates: "{{ k8s_ca_conf_directory }}/cert-etcd-peer-key.pem"
+  tags:
+    - kubernetes-ca
+    - kubernetes-ca-etcd
+
+- name: Set file permissions for etcd peer certificate files
+  file:
+    path: "{{ k8s_ca_conf_directory }}/{{ item }}"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  loop:
+    - cert-etcd-peer.pem
+    - cert-etcd-peer-key.pem
+    - cert-etcd-peer.csr
 
 - name: Generate TLS certificate for Kubernetes API server
   shell: >
@@ -510,3 +554,48 @@
     - cert-k8s-scheduler.pem
     - cert-k8s-scheduler-key.pem
     - cert-k8s-scheduler.csr
+
+- name: Create CSR files for etcd clients
+  template:
+    src: "cert-etcd-client-csr.json.j2"
+    dest: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-csr.json"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: "{{ k8s_ca_file_perm }}"
+  loop: "{{ etcd_additional_clients }}"
+  when: etcd_additional_clients is defined
+  tags:
+    - etcd-clients
+
+- name: Generate certificates for etcd clients
+  shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    cfssl gencert \
+      -ca=ca-etcd.pem \
+      -ca-key=ca-etcd-key.pem \
+      -config=ca-etcd-config.json \
+      -hostname="" \
+      -profile=client \
+      cert-{{ item }}-csr.json \
+    | cfssljson -bare cert-{{ item }}
+  loop: "{{ etcd_additional_clients }}"
+  when: etcd_additional_clients is defined
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ k8s_ca_conf_directory }}"
+    creates: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-key.pem"
+  tags:
+    - etcd-clients
+
+- name: Set file permissions for etcd client certificate files
+  file:
+    path: "{{ k8s_ca_conf_directory }}/cert-{{ item[0] }}{{ item[1] }}"
+    owner: "{{ k8s_ca_certificate_owner }}"
+    group: "{{ k8s_ca_certificate_group }}"
+    mode: '{{ k8s_ca_file_perm }}'
+    modification_time: "preserve"
+    access_time: "preserve"
+  loop: "{{ etcd_additional_clients | product(['.pem', '-key.pem', '.csr']) | list }}"
+  when: etcd_additional_clients is defined
+

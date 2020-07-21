@@ -1,9 +1,40 @@
 CHANGELOG
 ---------
 
+**9.0.0+1.18.4**
+
+- splitted etcd profiles in `server`, `peer` and `client`. This makes it possible to have seperate certificate files for `etcd`. E.g. the TLS parameters for `etcd` now looks like this:
+
+```
+--cert-file=cert-etcd-server.pem
+--key-file=cert-etcd-server-key.pem
+--trusted-ca-file=ca-etcd.pem
+--peer-cert-file=cert-etcd-peer.pem
+--peer-key-file=cert-etcd-peer-key.pem
+--peer-trusted-ca-file=ca-etcd.pem
+```
+
+Before this change `cert-file`, `key-file`, `peer-cert-file` and `peer-key-file` used the same certificate files.
+
+This change makes it also possible to create certificate files for `etcd` clients like `Traefik`, `Cilium` and so on to use the same TLS enabled `etcd` server. As `kube-apiserver` is also an `etcd` client this change also introduced separate certificate files e.g.:
+
+```
+--etcd-cafile=ca-etcd.pem
+--etcd-certfile=cert-k8s-apiserver-etcd.pem
+--etcd-keyfile=cert-k8s-apiserver-etcd-key.pem
+```
+
+- add `localhost` to `etcd_cert_hosts` and `k8s_apiserver_cert_hosts` variables
+- rename `etcd_csr_*` variables to `etcd_server_csr_*`
+- introduce `etcd_peer_csr_*` variables (see README for more information)
+- introduce `etcd_client_csr_*` variables (see README for more information)
+- introduce `etcd_additional_clients` variable (see README for more information)
+- add Ubuntu 20.04 as supported platform
+- increase minimum required Ansible version to 2.8
+
 **no changes**
 
-- delted old tags not compatible with Ansible Galaxy:
+- deleted old tags not compatible with Ansible Galaxy:
 
 ```
 r1.0.0_v1.6.0

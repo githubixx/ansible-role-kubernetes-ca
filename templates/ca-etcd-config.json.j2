@@ -4,14 +4,31 @@
       "expiry": "{{ ca_etcd_expiry }}"
     },
     "profiles": {
-      "etcd": {
-         "usages": [
-            "signing",
-            "key encipherment",
-            "server auth",
-            "client auth"
-          ],
-          "expiry": "{{ ca_etcd_expiry }}"
+      "server": {
+        "expiry": "{{ ca_etcd_expiry }}",
+        "usages": [
+          "signing",
+          "key encipherment",
+          "server auth",
+          "client auth"
+        ]
+      },
+      "peer": {
+        "expiry": "{{ ca_etcd_expiry }}",
+        "usages": [
+          "signing",
+          "key encipherment",
+          "server auth",
+          "client auth"
+        ]
+      },
+      "client": {
+        "expiry": "{{ ca_etcd_expiry }}",
+        "usages": [
+          "signing",
+          "key encipherment",
+          "client auth"
+        ]
       }
     }
   }
