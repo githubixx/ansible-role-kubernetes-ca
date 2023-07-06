@@ -266,7 +266,7 @@
       -ca=ca-etcd.pem \
       -ca-key=ca-etcd-key.pem \
       -config=ca-etcd-config.json \
-      -hostname={{ etcdHosts | ansible.utils.ipwrap }} \
+      -hostname={{ etcdHosts | ansible.utils.ipwrap}} \
       -profile=server \
       cert-etcd-server-csr.json \
     | cfssljson -bare cert-etcd-server
@@ -386,7 +386,7 @@
     - cert-admin-key.pem
     - cert-admin.csr
 
-- name: Generate TLS certificates for Kubernetes worker hosts (kubelet)
+- name: Generate TLS certificates for Kubernetes worker hosts (kubelet) (IPv4)
   shell: >
     set -o errexit; \
     set -o pipefail; \
@@ -394,23 +394,41 @@
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
       -config=ca-k8s-apiserver-config.json \
-      - hostname="{{ hostvars[item]['ansible_hostname'] }},
-        {%- if k8s_address_family == "ipv4" %}
-        {{ hostvars[item]['ansible_default_ipv4']['address'] }},
-        {{ hostvars[item][hostvars[item]["ansible_" + k8s_interface]['ipv4'][0]['address']] }}
-        {%- elif k8s_address_family == "ipv6" %}
-        {{ hostvars[item]['ansible_default_ipv6']['address'] }},
-        {{ hostvars[item][hostvars[item]["ansible_" + k8s_interface]['ipv6'][0]['address'] | ansible.utils.ipwrap]] }}
-        {%- endif }}" \
+      -hostname={{ hostvars[item]['ansible_hostname'] }},{{ hostvars[item]['ansible_default_ipv4']['address'] }},{{ hostvars[item]["ansible_" + k8s_interface]['ipv4'][0]['address'] }} \
       -profile=kubernetes \
-        cert-"{{ item }}"-csr.json \
-      | cfssljson -bare cert-"{{ item }}"
+      cert-{{ item }}-csr.json \
+    | cfssljson -bare cert-{{ item }}
   args:
     executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
     creates: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-key.pem"
   with_inventory_hostnames:
     - "{{ k8s_ca_worker_nodes_group }}"
+  when:
+    - k8s_address_family == "ipv4"
+  tags:
+    - kubernetes-ca
+
+- name: Generate TLS certificates for Kubernetes worker hosts (kubelet) (IPv6)
+  shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    cfssl gencert \
+      -ca=ca-k8s-apiserver.pem \
+      -ca-key=ca-k8s-apiserver-key.pem \
+      -config=ca-k8s-apiserver-config.json \
+      -hostname={{ hostvars[item]['ansible_hostname'] }},{{ hostvars[item]['ansible_default_ipv6']['address'] }},{{ hostvars[item]["ansible_" + k8s_interface]['ipv6'][0]['address'] }} \
+      -profile=kubernetes \
+      cert-{{ item }}-csr.json \
+    | cfssljson -bare cert-{{ item }}
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ k8s_ca_conf_directory }}"
+    creates: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-key.pem"
+  with_inventory_hostnames:
+    - "{{ k8s_ca_worker_nodes_group }}"
+  when:
+    - k8s_address_family == "ipv6"
   tags:
     - kubernetes-ca
 
