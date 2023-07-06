@@ -394,17 +394,17 @@
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
       -config=ca-k8s-apiserver-config.json \
-      - hostname={{ hostvars[item]['ansible_hostname'] }},
+      - hostname="{{ hostvars[item]['ansible_hostname'] }},
         {%- if k8s_address_family == "ipv4" %}
         {{ hostvars[item]['ansible_default_ipv4']['address'] }},
         {{ hostvars[item][hostvars[item]["ansible_" + k8s_interface]['ipv4'][0]['address']] }}
         {%- elif k8s_address_family == "ipv6" %}
         {{ hostvars[item]['ansible_default_ipv6']['address'] }},
         {{ hostvars[item][hostvars[item]["ansible_" + k8s_interface]['ipv6'][0]['address'] | ansible.utils.ipwrap]] }}
-        {%- endif }} \
+        {%- endif }}" \
       -profile=kubernetes \
-        cert-{{ item }}-csr.json \
-      | cfssljson -bare cert-{{ item }}
+        cert-"{{ item }}"-csr.json \
+      | cfssljson -bare cert-"{{ item }}"
   args:
     executable: "/bin/bash"
     chdir: "{{ k8s_ca_conf_directory }}"
