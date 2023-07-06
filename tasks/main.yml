@@ -266,7 +266,7 @@
       -ca=ca-etcd.pem \
       -ca-key=ca-etcd-key.pem \
       -config=ca-etcd-config.json \
-      -hostname={{ etcdHosts | ansible.utils.ipwrap}} \
+      -hostname={{ etcdHosts | ansible.utils.ipwrap | quote }} \
       -profile=server \
       cert-etcd-server-csr.json \
     | cfssljson -bare cert-etcd-server
@@ -299,7 +299,7 @@
       -ca=ca-etcd.pem \
       -ca-key=ca-etcd-key.pem \
       -config=ca-etcd-config.json \
-      -hostname={{ etcdHosts | ansible.utils.ipwrap }} \
+      -hostname={{ etcdHosts | ansible.utils.ipwrap | quote }} \
       -profile=peer \
       cert-etcd-peer-csr.json \
     | cfssljson -bare cert-etcd-peer
@@ -332,7 +332,7 @@
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
       -config=ca-k8s-apiserver-config.json \
-      -hostname={{ k8sApiHosts | ansible.utils.ipwrap }} \
+      -hostname={{ k8sApiHosts | ansible.utils.ipwrap | quote }} \
       -profile=kubernetes \
       cert-k8s-apiserver-csr.json \
     | cfssljson -bare cert-k8s-apiserver
@@ -417,7 +417,7 @@
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
       -config=ca-k8s-apiserver-config.json \
-      -hostname={{ hostvars[item]['ansible_hostname'] }},{{ hostvars[item]['ansible_default_ipv6']['address'] }},{{ hostvars[item]["ansible_" + k8s_interface]['ipv6'][0]['address'] }} \
+      -hostname={{ hostvars[item]['ansible_hostname'] }},{{ hostvars[item]['ansible_default_ipv6']['address'] | ansible.utils.ipwrap  | quote }},{{ hostvars[item]["ansible_" + k8s_interface]['ipv6'][0]['address'] | ansible.utils.ipwrap | quote }} \
       -profile=kubernetes \
       cert-{{ item }}-csr.json \
     | cfssljson -bare cert-{{ item }}
