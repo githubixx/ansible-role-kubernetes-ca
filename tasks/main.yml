@@ -8,9 +8,17 @@
 - name: Generate list of IP addresses and hostnames needed for Kubernetes API server certificate
   set_fact:
     k8sApiHosts: >-
-      {% set comma = joiner(",") %}{% for item in groups[k8s_ca_controller_nodes_group] -%}
-        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
-      {%- endfor %}{% for item in k8s_apiserver_cert_hosts -%}
+      {% set comma = joiner(",") %}
+      {% if k8s_address_family == "IPv4" %}
+        {%- for item in groups[k8s_ca_controller_nodes_group] -%}
+          {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+        {%- endfor -%}
+      {% elif k8s_address_family == "IPv6" %}
+        {%- for item in groups[k8s_ca_controller_nodes_group] -%}
+          {{ comma() }}{{ hostvars[item].ansible_default_ipv6.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv6.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+        {%- endfor -%}
+      {% endif %}
+      {%- for item in k8s_apiserver_cert_hosts -%}
         {{ comma() }}{{ item }}
       {%- endfor %}
   tags:
@@ -23,20 +31,20 @@
 
 - name: Generate list of IP addresses and hostnames needed for etcd certificate
   set_fact:
-  etcdHosts: >-
-    {% set comma = joiner(",") %}
-    {% if k8s_address_family == "ipv4" %}
-      {%- for item in groups[k8s_ca_etcd_nodes_group] -%}
-        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
-      {%- endfor -%}
-    {% elif k8s_address_family == "ipv6" %}
-      {%- for item in groups[k8s_ca_etcd_nodes_group] -%}
-        {{ comma() }}{{ hostvars[item].ansible_default_ipv6.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv6.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
-      {%- endfor -%}
-    {% endif %}
-    {%- for item in etcd_cert_hosts -%}
-      {{ comma() }}{{ item }}
-    {%- endfor %}
+    etcdHosts: >-
+      {% set comma = joiner(",") %}
+      {% if k8s_address_family == "ipv4" %}
+        {%- for item in groups[k8s_ca_etcd_nodes_group] -%}
+          {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+        {%- endfor -%}
+      {% elif k8s_address_family == "ipv6" %}
+        {%- for item in groups[k8s_ca_etcd_nodes_group] -%}
+          {{ comma() }}{{ hostvars[item].ansible_default_ipv6.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv6.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+        {%- endfor -%}
+      {% endif %}
+      {%- for item in etcd_cert_hosts -%}
+        {{ comma() }}{{ item }}
+      {%- endfor %}
   tags:
     - kubernetes-ca
     - kubernetes-ca-etcd
