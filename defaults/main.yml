@@ -120,7 +120,7 @@ k8s_admin_csr_key_algo: "rsa"
 k8s_admin_csr_key_size: "2048"
 k8s_admin_csr_names_c: "DE"
 k8s_admin_csr_names_l: "The_Internet"
-k8s_admin_csr_names_o: "system:masters" # DO NOT CHANGE!
+k8s_admin_csr_names_o: "system:masters"  # DO NOT CHANGE!
 k8s_admin_csr_names_ou: "BY"
 k8s_admin_csr_names_st: "Bayern"
 
@@ -138,37 +138,37 @@ k8s_worker_csr_key_algo: "rsa"
 k8s_worker_csr_key_size: "2048"
 k8s_worker_csr_names_c: "DE"
 k8s_worker_csr_names_l: "The_Internet"
-k8s_worker_csr_names_o: "system:nodes" # DO NOT CHANGE!
+k8s_worker_csr_names_o: "system:nodes"  # DO NOT CHANGE!
 k8s_worker_csr_names_ou: "BY"
 k8s_worker_csr_names_st: "Bayern"
 
 # CSR parameter for the kube-proxy client certificate
-k8s_kube_proxy_csr_cn: "system:kube-proxy" # DO NOT CHANGE!
+k8s_kube_proxy_csr_cn: "system:kube-proxy"  # DO NOT CHANGE!
 k8s_kube_proxy_csr_key_algo: "rsa"
 k8s_kube_proxy_csr_key_size: "2048"
 k8s_kube_proxy_csr_names_c: "DE"
 k8s_kube_proxy_csr_names_l: "The_Internet"
-k8s_kube_proxy_csr_names_o: "system:node-proxier" # DO NOT CHANGE!
+k8s_kube_proxy_csr_names_o: "system:node-proxier"  # DO NOT CHANGE!
 k8s_kube_proxy_csr_names_ou: "BY"
 k8s_kube_proxy_csr_names_st: "Bayern"
 
 # CSR parameter for the kube-scheduler client certificate
-k8s_scheduler_csr_cn: "system:kube-scheduler" # DO NOT CHANGE!
+k8s_scheduler_csr_cn: "system:kube-scheduler"  # DO NOT CHANGE!
 k8s_scheduler_csr_key_algo: "rsa"
 k8s_scheduler_csr_key_size: "2048"
 k8s_scheduler_csr_names_c: "DE"
 k8s_scheduler_csr_names_l: "The_Internet"
-k8s_scheduler_csr_names_o: "system:kube-scheduler" # DO NOT CHANGE!
+k8s_scheduler_csr_names_o: "system:kube-scheduler"  # DO NOT CHANGE!
 k8s_scheduler_csr_names_ou: "BY"
 k8s_scheduler_csr_names_st: "Bayern"
 
 # CSR parameter for the kube-controller-manager client certificate
-k8s_controller_manager_csr_cn: "system:kube-controller-manager" # DO NOT CHANGE!
+k8s_controller_manager_csr_cn: "system:kube-controller-manager"  # DO NOT CHANGE!
 k8s_controller_manager_csr_key_algo: "rsa"
 k8s_controller_manager_csr_key_size: "2048"
 k8s_controller_manager_csr_names_c: "DE"
 k8s_controller_manager_csr_names_l: "The_Internet"
-k8s_controller_manager_csr_names_o: "system:kube-controller-manager" # DO NOT CHANGE!
+k8s_controller_manager_csr_names_o: "system:kube-controller-manager"  # DO NOT CHANGE!
 k8s_controller_manager_csr_names_ou: "BY"
 k8s_controller_manager_csr_names_st: "Bayern"
 
@@ -239,7 +239,7 @@ k8s_apiserver_cert_hosts:
 #   - traefik
 #   - cilium
 #
-# This will generate additional files in the directory specified in 
+# This will generate additional files in the directory specified in
 # "k8s_ca_conf_directory" variable e.g. "cert-traefik*" and "cert-cilium*".
 # So instead of running a separate etcd cluster for "Traefik" and/or
 # "Cilium" the already running etcd cluster for Kubernetes can be used in
