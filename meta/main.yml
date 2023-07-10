@@ -1,14 +1,15 @@
+---
 galaxy_info:
   author: Robert Wimmer
   description: Generate Kubernetes CA plus certificates for etcd and Kubernetes API server
   license: GPLv3
-  min_ansible_version: 2.8
+  min_ansible_version: "2.8"
   platforms:
-  - name: Ubuntu
-    versions:
-    - xenial
-    - bionic
-    - focal
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+        - focal
   galaxy_tags:
     - tls
     - certificate
