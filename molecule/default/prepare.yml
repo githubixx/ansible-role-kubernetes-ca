@@ -1,0 +1,43 @@
+---
+# Copyright (C) 2023 Robert Wimmer
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+- name: Update cache
+  hosts: k8s
+  remote_user: vagrant
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Update APT package cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+- name: Harden hosts
+  hosts: all
+  remote_user: vagrant
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Setup harden-linux role
+      include_role:
+        name: githubixx.harden-linux
+
+- name: Setup Wireguard VPN
+  hosts: vpn
+  remote_user: vagrant
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Setup wireguard role
+      include_role:
+        name: githubixx.ansible_role_wireguard
+
+- name: Setup cfssl
+  hosts: k8s_assets
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Install cfssl
+      include_role:
+        name: githubixx.cfssl
