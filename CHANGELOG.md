@@ -1,6 +1,18 @@
 CHANGELOG
 ---------
 
+**10.0.0+1.18.4**
+
+- add Molecule test
+- add `.ansible-lint`
+- add '.yamllint`
+- add Github workflow
+- increase `min_ansible_version` from `2.8` to `2.9`
+- rename internal variable `workerHost` to `worker_host`
+- rename internal variable `etcdHosts` to `etcd_hosts`
+- rename internal variable `k8sApiHosts` to `k8s_api_hosts`
+- fix `ansible-lint` issues (use Ansible FQDN module names)
+
 **9.0.0+1.18.4**
 
 - splitted etcd profiles in `server`, `peer` and `client`. This makes it possible to have seperate certificate files for `etcd`. E.g. the TLS parameters for `etcd` now looks like this:
