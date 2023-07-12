@@ -113,6 +113,6 @@ scenario:
     - prepare
     - converge
 
-#verifier:
-#  name: ansible
-#  enabled: true
+verifier:
+  name: ansible
+  enabled: true
