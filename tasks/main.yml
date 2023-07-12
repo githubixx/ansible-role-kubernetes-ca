@@ -8,9 +8,17 @@
 - name: Generate list of IP addresses and hostnames needed for Kubernetes API server certificate
   set_fact:
     k8sApiHosts: >-
-      {% set comma = joiner(",") %}{% for item in groups[k8s_ca_controller_nodes_group] -%}
-        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
-      {%- endfor %}{% for item in k8s_apiserver_cert_hosts -%}
+      {% set comma = joiner(",") %}
+      {% if k8s_address_family == "ipv4" %}
+        {%- for item in groups[k8s_ca_controller_nodes_group] -%}
+          {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_" + k8s_interface]['ipv4'][0]['address'] }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+        {%- endfor -%}
+      {% elif k8s_address_family == "ipv6" %}
+        {%- for item in groups[k8s_ca_controller_nodes_group] -%}
+          {{ comma() }}{{ hostvars[item].ansible_default_ipv6.address | quote }}{{ comma() }}{{ hostvars[item]["ansible_" + k8s_interface]['ipv6'][0]['address'] | quote }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+        {%- endfor -%}
+      {% endif %}
+      {%- for item in k8s_apiserver_cert_hosts -%}
         {{ comma() }}{{ item }}
       {%- endfor %}
   tags:
@@ -24,9 +32,17 @@
 - name: Generate list of IP addresses and hostnames needed for etcd certificate
   set_fact:
     etcdHosts: >-
-      {% set comma = joiner(",") %}{% for item in groups[k8s_ca_etcd_nodes_group] -%}
-        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
-      {%- endfor %}{% for item in etcd_cert_hosts -%}
+      {% set comma = joiner(",") %}
+      {% if k8s_address_family == "ipv4" %}
+        {%- for item in groups[k8s_ca_etcd_nodes_group] -%}
+          {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_" + k8s_interface]['ipv4'][0]['address'] }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+        {%- endfor -%}
+      {% elif k8s_address_family == "ipv6" %}
+        {%- for item in groups[k8s_ca_etcd_nodes_group] -%}
+          {{ comma() }}{{ hostvars[item].ansible_default_ipv6.address | quote }}{{ comma() }}{{ hostvars[item]["ansible_" + k8s_interface]['ipv6'][0]['address'] | quote }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+        {%- endfor -%}
+      {% endif %}
+      {%- for item in etcd_cert_hosts -%}
         {{ comma() }}{{ item }}
       {%- endfor %}
   tags:
@@ -250,7 +266,7 @@
       -ca=ca-etcd.pem \
       -ca-key=ca-etcd-key.pem \
       -config=ca-etcd-config.json \
-      -hostname={{ etcdHosts }} \
+      -hostname={{ etcdHosts | quote }} \
       -profile=server \
       cert-etcd-server-csr.json \
     | cfssljson -bare cert-etcd-server
@@ -283,7 +299,7 @@
       -ca=ca-etcd.pem \
       -ca-key=ca-etcd-key.pem \
       -config=ca-etcd-config.json \
-      -hostname={{ etcdHosts }} \
+      -hostname={{ etcdHosts | quote }} \
       -profile=peer \
       cert-etcd-peer-csr.json \
     | cfssljson -bare cert-etcd-peer
@@ -316,7 +332,7 @@
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
       -config=ca-k8s-apiserver-config.json \
-      -hostname={{ k8sApiHosts }} \
+      -hostname={{ k8sApiHosts | quote }} \
       -profile=kubernetes \
       cert-k8s-apiserver-csr.json \
     | cfssljson -bare cert-k8s-apiserver
@@ -370,7 +386,7 @@
     - cert-admin-key.pem
     - cert-admin.csr
 
-- name: Generate TLS certificates for Kubernetes worker hosts (kubelet)
+- name: Generate TLS certificates for Kubernetes worker hosts (kubelet) (IPv4)
   shell: >
     set -o errexit; \
     set -o pipefail; \
@@ -378,7 +394,7 @@
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
       -config=ca-k8s-apiserver-config.json \
-      -hostname={{ hostvars[item]['ansible_hostname'] }},{{ hostvars[item]['ansible_default_ipv4']['address'] }},{{ hostvars[item]['ansible_'+hostvars[item]['k8s_interface']].ipv4.address }} \
+      -hostname={{ hostvars[item]['ansible_hostname'] }},{{ hostvars[item]['ansible_default_ipv4']['address'] }},{{ hostvars[item]["ansible_" + k8s_interface]['ipv4'][0]['address'] }} \
       -profile=kubernetes \
       cert-{{ item }}-csr.json \
     | cfssljson -bare cert-{{ item }}
@@ -388,6 +404,31 @@
     creates: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-key.pem"
   with_inventory_hostnames:
     - "{{ k8s_ca_worker_nodes_group }}"
+  when:
+    - k8s_address_family == "ipv4"
+  tags:
+    - kubernetes-ca
+
+- name: Generate TLS certificates for Kubernetes worker hosts (kubelet) (IPv6)
+  shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    cfssl gencert \
+      -ca=ca-k8s-apiserver.pem \
+      -ca-key=ca-k8s-apiserver-key.pem \
+      -config=ca-k8s-apiserver-config.json \
+      -hostname={{ hostvars[item]['ansible_hostname'] }},{{ hostvars[item]['ansible_default_ipv6']['address'] | quote }},{{ hostvars[item]["ansible_" + k8s_interface]['ipv6'][0]['address'] | quote }} \
+      -profile=kubernetes \
+      cert-{{ item }}-csr.json \
+    | cfssljson -bare cert-{{ item }}
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ k8s_ca_conf_directory }}"
+    creates: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-key.pem"
+  with_inventory_hostnames:
+    - "{{ k8s_ca_worker_nodes_group }}"
+  when:
+    - k8s_address_family == "ipv6"
   tags:
     - kubernetes-ca
 

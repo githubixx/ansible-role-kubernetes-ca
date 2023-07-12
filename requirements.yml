@@ -1,0 +1,5 @@
+---
+collections:
+  - name: ansible.utils
+    version: ">=2.10.3"
+    type: galaxy

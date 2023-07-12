@@ -35,6 +35,9 @@ k8s_ca_worker_nodes_group: "k8s_worker"
 # "wg0" (WireGuard), "peervpn0" (PeerVPN) or "tap0".
 k8s_interface: "tap0"
 
+#This overrides the address family which is used for generating the IP addresses within the certificates
+k8s_address_family: ipv4
+
 # Expiry for etcd root certificate
 ca_etcd_expiry: "87600h"
 
