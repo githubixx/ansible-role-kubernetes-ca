@@ -1,0 +1,12 @@
+---
+# Copyright (C) 2023 Robert Wimmer
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+- name: Setup certificates
+  hosts: k8s_assets
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Generate etcd and K8s TLS certificates
+      include_role:
+        name: githubixx.kubernetes-ca

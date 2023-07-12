@@ -1,15 +1,15 @@
 ---
 - name: Gather instance facts
-  setup:
+  ansible.builtin.setup:
   delegate_to: "{{ item }}"
-  delegate_facts: True
+  delegate_facts: true
   loop: "{{ groups[k8s_ca_controller_nodes_group] | union(groups[k8s_ca_worker_nodes_group]) | union(groups[k8s_ca_etcd_nodes_group]) }}"
 
 - name: Generate list of IP addresses and hostnames needed for Kubernetes API server certificate
-  set_fact:
-    k8sApiHosts: >-
+  ansible.builtin.set_fact:
+    k8s_api_hosts: >-
       {% set comma = joiner(",") %}{% for item in groups[k8s_ca_controller_nodes_group] -%}
-        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_" + hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
       {%- endfor %}{% for item in k8s_apiserver_cert_hosts -%}
         {{ comma() }}{{ item }}
       {%- endfor %}
@@ -17,15 +17,17 @@
     - kubernetes-ca
 
 - name: Output of hostnames/IPs used for Kubernetes API server certificate
-  debug: var=k8sApiHosts
+  ansible.builtin.debug:
+    var: k8s_api_hosts
+    verbosity: 2
   tags:
     - kubernetes-ca
 
 - name: Generate list of IP addresses and hostnames needed for etcd certificate
-  set_fact:
-    etcdHosts: >-
+  ansible.builtin.set_fact:
+    etcd_hosts: >-
       {% set comma = joiner(",") %}{% for item in groups[k8s_ca_etcd_nodes_group] -%}
-        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_"+hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_" + hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
       {%- endfor %}{% for item in etcd_cert_hosts -%}
         {{ comma() }}{{ item }}
       {%- endfor %}
@@ -34,13 +36,15 @@
     - kubernetes-ca-etcd
 
 - name: Output of hostnames/IPs used for etcd certificate
-  debug: var=etcdHosts
+  ansible.builtin.debug:
+    var: etcd_hosts
+    verbosity: 2
   tags:
     - kubernetes-ca
     - kubernetes-ca-etcd
 
 - name: Create directory for CA and certificate files
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -50,7 +54,7 @@
     - kubernetes-ca
 
 - name: Create etcd CA configuration file
-  template:
+  ansible.builtin.template:
     src: "ca-etcd-config.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/ca-etcd-config.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -61,7 +65,7 @@
     - kubernetes-ca-etcd
 
 - name: Create Kubernetes API server CA configuration file
-  template:
+  ansible.builtin.template:
     src: "ca-k8s-apiserver-config.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/ca-k8s-apiserver-config.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -71,7 +75,7 @@
     - kubernetes-ca
 
 - name: Create the etcd CA certificate request file (CSR)
-  template:
+  ansible.builtin.template:
     src: "ca-etcd-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/ca-etcd-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -82,7 +86,7 @@
     - kubernetes-ca-etcd
 
 - name: Create the Kubernetes API server CA certificate request file (CSR)
-  template:
+  ansible.builtin.template:
     src: "ca-k8s-apiserver-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/ca-k8s-apiserver-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -92,7 +96,7 @@
     - kubernetes-ca
 
 - name: Generate the etcd certificate authority (CA) and private key
-  shell: >
+  ansible.builtin.shell: >
     set -o errexit; \
     set -o pipefail; \
     cfssl gencert \
@@ -107,7 +111,7 @@
     - kubernetes-ca-etcd
 
 - name: Set file permissions for etcd CA and private key file
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/{{ item }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -120,7 +124,7 @@
     - ca-etcd.csr
 
 - name: Generate Kubernetes API server certificate authority (CA) and private key
-  shell: >
+  ansible.builtin.shell: >
     set -o errexit; \
     set -o pipefail; \
     cfssl gencert \
@@ -134,7 +138,7 @@
     - kubernetes-ca
 
 - name: Set file permissions for Kubernetes API server CA and private key
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/{{ item }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -147,7 +151,7 @@
     - ca-k8s-apiserver.csr
 
 - name: Create the etcd server CSR file
-  template:
+  ansible.builtin.template:
     src: "cert-etcd-server-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/cert-etcd-server-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -158,7 +162,7 @@
     - kubernetes-ca-etcd
 
 - name: Create the etcd peer CSR file
-  template:
+  ansible.builtin.template:
     src: "cert-etcd-peer-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/cert-etcd-peer-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -169,7 +173,7 @@
     - kubernetes-ca-etcd
 
 - name: Create the Kubernetes API server key CSR file
-  template:
+  ansible.builtin.template:
     src: "cert-k8s-apiserver-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/cert-k8s-apiserver-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -179,7 +183,7 @@
     - kubernetes-ca
 
 - name: Create the admin user key CSR file
-  template:
+  ansible.builtin.template:
     src: "cert-admin-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/cert-admin-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -189,7 +193,7 @@
     - kubernetes-ca
 
 - name: Create the kube-proxy key CSR file
-  template:
+  ansible.builtin.template:
     src: "cert-k8s-proxy-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/cert-k8s-proxy-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -199,7 +203,7 @@
     - kubernetes-ca
 
 - name: Create the worker key CSR files
-  template:
+  ansible.builtin.template:
     src: "cert-worker-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -208,12 +212,12 @@
   with_inventory_hostnames:
     - "{{ k8s_ca_worker_nodes_group }}"
   vars:
-    - workerHost: "{{ item }}"
+    worker_host: "{{ item }}"
   tags:
     - kubernetes-ca
 
 - name: Create the kube-controller-manager key CSR file
-  template:
+  ansible.builtin.template:
     src: "cert-k8s-controller-manager-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/cert-k8s-controller-manager-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -223,7 +227,7 @@
     - kubernetes-ca
 
 - name: Create the kube-controller-manager service-account key CSR file
-  template:
+  ansible.builtin.template:
     src: "cert-k8s-controller-manager-sa-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/cert-k8s-controller-manager-sa-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -233,7 +237,7 @@
     - kubernetes-ca
 
 - name: Create the kube-scheduler key CSR file
-  template:
+  ansible.builtin.template:
     src: "cert-k8s-scheduler-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/cert-k8s-scheduler-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -243,14 +247,14 @@
     - kubernetes-ca
 
 - name: Generate TLS server certificate for etcd
-  shell: >
+  ansible.builtin.shell: >
     set -o errexit; \
     set -o pipefail; \
     cfssl gencert \
       -ca=ca-etcd.pem \
       -ca-key=ca-etcd-key.pem \
       -config=ca-etcd-config.json \
-      -hostname={{ etcdHosts }} \
+      -hostname={{ etcd_hosts }} \
       -profile=server \
       cert-etcd-server-csr.json \
     | cfssljson -bare cert-etcd-server
@@ -263,7 +267,7 @@
     - kubernetes-ca-etcd
 
 - name: Set file permissions for etcd server certificate files
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/{{ item }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -276,14 +280,14 @@
     - cert-etcd-server.csr
 
 - name: Generate TLS peer certificate for etcd
-  shell: >
+  ansible.builtin.shell: >
     set -o errexit; \
     set -o pipefail; \
     cfssl gencert \
       -ca=ca-etcd.pem \
       -ca-key=ca-etcd-key.pem \
       -config=ca-etcd-config.json \
-      -hostname={{ etcdHosts }} \
+      -hostname={{ etcd_hosts }} \
       -profile=peer \
       cert-etcd-peer-csr.json \
     | cfssljson -bare cert-etcd-peer
@@ -296,7 +300,7 @@
     - kubernetes-ca-etcd
 
 - name: Set file permissions for etcd peer certificate files
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/{{ item }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -309,14 +313,14 @@
     - cert-etcd-peer.csr
 
 - name: Generate TLS certificate for Kubernetes API server
-  shell: >
+  ansible.builtin.shell: >
     set -o errexit; \
     set -o pipefail; \
     cfssl gencert \
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
       -config=ca-k8s-apiserver-config.json \
-      -hostname={{ k8sApiHosts }} \
+      -hostname={{ k8s_api_hosts }} \
       -profile=kubernetes \
       cert-k8s-apiserver-csr.json \
     | cfssljson -bare cert-k8s-apiserver
@@ -328,7 +332,7 @@
     - kubernetes-ca
 
 - name: Set file permissions for Kubernetes API server certificate files
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/{{ item }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -341,7 +345,7 @@
     - cert-k8s-apiserver.csr
 
 - name: Generate TLS certificate for admin user
-  shell: >
+  ansible.builtin.shell: >
     set -o errexit; \
     set -o pipefail; \
     cfssl gencert \
@@ -358,7 +362,7 @@
     - kubernetes-ca
 
 - name: Set file permissions for admin user certificate files
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/{{ item }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -371,14 +375,14 @@
     - cert-admin.csr
 
 - name: Generate TLS certificates for Kubernetes worker hosts (kubelet)
-  shell: >
+  ansible.builtin.shell: >
     set -o errexit; \
     set -o pipefail; \
     cfssl gencert \
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
       -config=ca-k8s-apiserver-config.json \
-      -hostname={{ hostvars[item]['ansible_hostname'] }},{{ hostvars[item]['ansible_default_ipv4']['address'] }},{{ hostvars[item]['ansible_'+hostvars[item]['k8s_interface']].ipv4.address }} \
+      -hostname={{ hostvars[item]['ansible_hostname'] }},{{ hostvars[item]['ansible_default_ipv4']['address'] }},{{ hostvars[item]['ansible_' + hostvars[item]['k8s_interface']].ipv4.address }} \
       -profile=kubernetes \
       cert-{{ item }}-csr.json \
     | cfssljson -bare cert-{{ item }}
@@ -392,7 +396,7 @@
     - kubernetes-ca
 
 - name: Set file permissions for Kubernetes worker certificate files (1/3)
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/cert-{{ item }}.pem"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -405,7 +409,7 @@
     - kubernetes-ca
 
 - name: Set file permissions for Kubernetes worker certificate files (2/3)
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-key.pem"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -418,7 +422,7 @@
     - kubernetes-ca
 
 - name: Set file permissions for Kubernetes worker certificate files (3/3)
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/cert-{{ item }}.csr"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -431,7 +435,7 @@
     - kubernetes-ca
 
 - name: Generate TLS certificate for kube-proxy
-  shell: >
+  ansible.builtin.shell: >
     set -o errexit; \
     set -o pipefail; \
     cfssl gencert \
@@ -449,7 +453,7 @@
     - kubernetes-ca
 
 - name: Set file permissions for kube-proxy certificate files
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/{{ item }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -463,7 +467,7 @@
 
 
 - name: Generate TLS certificate for kube-controller-manager
-  shell: >
+  ansible.builtin.shell: >
     set -o errexit; \
     set -o pipefail; \
     cfssl gencert \
@@ -481,7 +485,7 @@
     - kubernetes-ca
 
 - name: Set file permissions for kube-controller-manager certificate files
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/{{ item }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -494,7 +498,7 @@
     - cert-k8s-controller-manager.csr
 
 - name: Generate TLS certificate for kube-controller-manager service account
-  shell: >
+  ansible.builtin.shell: >
     set -o errexit; \
     set -o pipefail; \
     cfssl gencert \
@@ -512,7 +516,7 @@
     - kubernetes-ca
 
 - name: Set file permissions for kube-controller-manager service account certificate files
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/{{ item }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -525,7 +529,7 @@
     - cert-k8s-controller-manager-sa.csr
 
 - name: Generate TLS certificate for kube-scheduler
-  shell: >
+  ansible.builtin.shell: >
     set -o errexit; \
     set -o pipefail; \
     cfssl gencert \
@@ -543,7 +547,7 @@
     - kubernetes-ca
 
 - name: Set file permissions for kube-scheduler certificate files
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/{{ item }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -556,7 +560,7 @@
     - cert-k8s-scheduler.csr
 
 - name: Create CSR files for etcd clients
-  template:
+  ansible.builtin.template:
     src: "cert-etcd-client-csr.json.j2"
     dest: "{{ k8s_ca_conf_directory }}/cert-{{ item }}-csr.json"
     owner: "{{ k8s_ca_certificate_owner }}"
@@ -568,7 +572,7 @@
     - etcd-clients
 
 - name: Generate certificates for etcd clients
-  shell: >
+  ansible.builtin.shell: >
     set -o errexit; \
     set -o pipefail; \
     cfssl gencert \
@@ -589,7 +593,7 @@
     - etcd-clients
 
 - name: Set file permissions for etcd client certificate files
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_ca_conf_directory }}/cert-{{ item[0] }}{{ item[1] }}"
     owner: "{{ k8s_ca_certificate_owner }}"
     group: "{{ k8s_ca_certificate_group }}"
@@ -598,4 +602,3 @@
     access_time: "preserve"
   loop: "{{ etcd_additional_clients | product(['.pem', '-key.pem', '.csr']) | list }}"
   when: etcd_additional_clients is defined
-

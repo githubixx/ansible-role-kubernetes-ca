@@ -1,5 +1,5 @@
 {
-  "CN": "system:node:{{ hostvars[workerHost]['ansible_hostname'] }}",
+  "CN": "system:node:{{ hostvars[worker_host]['ansible_hostname'] }}",
   "key": {
     "algo": "{{ k8s_worker_csr_key_algo }}",
     "size": {{ k8s_worker_csr_key_size }}

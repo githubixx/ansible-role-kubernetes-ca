@@ -1,0 +1,61 @@
+---
+# Copyright (C) 2023 Robert Wimmer
+# SPDX-License-Identifier: GPL-3.0-or-later 
+
+- name: Verify setup
+  hosts: test-assets
+  tasks:
+    - name: Check cert-k8s-proxy.pem
+      ansible.builtin.shell: |
+        set -o errexit
+        set -o pipefail
+        set -o nounset
+        openssl x509 -in {{ k8s_ca_conf_directory }}/cert-k8s-proxy.pem -text -noout | grep -q "CN = system:kube-proxy"
+        exit 0
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Check cert-test-worker1.pem
+      ansible.builtin.shell: |
+        set -o errexit
+        set -o pipefail
+        set -o nounset
+        openssl x509 -in {{ k8s_ca_conf_directory }}/cert-test-worker1.pem -text -noout | grep -q "CN = system:node:test-worker1"
+        exit 0
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Check cert-k8s-scheduler.pem
+      ansible.builtin.shell: |
+        set -o errexit
+        set -o pipefail
+        set -o nounset
+        openssl x509 -in {{ k8s_ca_conf_directory }}/cert-k8s-scheduler.pem -text -noout | grep -q "CN = system:kube-scheduler"
+        exit 0
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Check cert-k8s-controller-manager.pem
+      ansible.builtin.shell: |
+        set -o errexit
+        set -o pipefail
+        set -o nounset
+        openssl x509 -in {{ k8s_ca_conf_directory }}/cert-k8s-controller-manager.pem -text -noout | grep -q "CN = system:kube-controller-manager"
+        exit 0
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Check cert-k8s-controller-manager-sa.pem
+      ansible.builtin.shell: |
+        set -o errexit
+        set -o pipefail
+        set -o nounset
+        openssl x509 -in {{ k8s_ca_conf_directory }}/cert-k8s-controller-manager-sa.pem -text -noout | grep -q "CN = service-accounts"
+        exit 0
+      args:
+        executable: /bin/bash
+      changed_when: false
