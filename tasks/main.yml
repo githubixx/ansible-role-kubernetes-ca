@@ -11,11 +11,11 @@
       {% set comma = joiner(",") %}
       {% if k8s_address_family == "ipv4" %}
         {%- for item in groups[k8s_ca_controller_nodes_group] -%}
-          {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_" + k8s_interface]['ipv4'][0]['address'] }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+          {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["access_ip"] }}{{ comma() }}{{ hostvars[item]["ansible_" + k8s_interface]['ipv4'][0]['address'] }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
         {%- endfor -%}
       {% elif k8s_address_family == "ipv6" %}
         {%- for item in groups[k8s_ca_controller_nodes_group] -%}
-          {{ comma() }}{{ hostvars[item].ansible_default_ipv6.address | quote }}{{ comma() }}{{ hostvars[item]["ansible_" + k8s_interface]['ipv6'][0]['address'] | quote }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+          {{ comma() }}{{ hostvars[item].ansible_default_ipv6.address | quote }}{{ comma() }}{{ hostvars[item]["access_ip"] }}{{ comma() }}{{ hostvars[item]["ansible_" + k8s_interface]['ipv6'][0]['address'] | quote }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
         {%- endfor -%}
       {% endif %}
       {%- for item in k8s_apiserver_cert_hosts -%}
@@ -35,11 +35,11 @@
       {% set comma = joiner(",") %}
       {% if k8s_address_family == "ipv4" %}
         {%- for item in groups[k8s_ca_etcd_nodes_group] -%}
-          {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_" + k8s_interface]['ipv4'][0]['address'] }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+          {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_" + k8s_interface]['ipv4'][0]['address'] }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["access_ip"] }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
         {%- endfor -%}
       {% elif k8s_address_family == "ipv6" %}
         {%- for item in groups[k8s_ca_etcd_nodes_group] -%}
-          {{ comma() }}{{ hostvars[item].ansible_default_ipv6.address | quote }}{{ comma() }}{{ hostvars[item]["ansible_" + k8s_interface]['ipv6'][0]['address'] | quote }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+          {{ comma() }}{{ hostvars[item].ansible_default_ipv6.address | quote }}{{ comma() }}{{ hostvars[item]["ansible_" + k8s_interface]['ipv6'][0]['address'] | quote }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["access_ip"] }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
         {%- endfor -%}
       {% endif %}
       {%- for item in etcd_cert_hosts -%}
