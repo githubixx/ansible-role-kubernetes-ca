@@ -5,4 +5,4 @@
 roles:
   - githubixx.ansible_role_wireguard
   - githubixx.cfssl
-  - githubixx.kubernetes-ca
+  - githubixx.kubernetes_ca
