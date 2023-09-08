@@ -4,12 +4,12 @@ galaxy_info:
   description: Generate Kubernetes CA plus certificates for etcd and Kubernetes API server
   license: GPLv3
   min_ansible_version: "2.9"
+  role_name: kubernetes_ca
   platforms:
     - name: Ubuntu
       versions:
-        - xenial
-        - bionic
-        - focal
+        - "focal"
+        - "jammy"
   galaxy_tags:
     - tls
     - certificate

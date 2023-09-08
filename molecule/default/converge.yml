@@ -9,4 +9,4 @@
   tasks:
     - name: Generate etcd and K8s TLS certificates
       include_role:
-        name: githubixx.kubernetes-ca
+        name: githubixx.kubernetes_ca

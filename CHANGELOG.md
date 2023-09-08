@@ -1,6 +1,15 @@
 CHANGELOG
 ---------
 
+**11.0.0+1.18.4**
+
+- **BREAKING**: `meta/main.yml`: change role_name from `kubernetes-ca` to `kubernetes_ca`. This is a requirement since quite some time for Ansible Galaxy. But the requirement was introduced after this role already existed for quite some time. So please update the name of the role in your playbook accordingly!
+- rename `githubixx.kubernetes-ca` to `githubixx.kubernetes_ca`
+- `molecule/default/requirements.yml`: remove `githubixx.kubernetes_ca`
+- `meta/main.yml`: added `role_name`
+- added support for Ubuntu 22.04
+- removed support for Ubuntu 16.04 and 18.04 (reached EOL)
+
 **10.0.0+1.18.4**
 
 - add Molecule test

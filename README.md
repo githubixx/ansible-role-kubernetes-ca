@@ -281,7 +281,7 @@ Example Playbook
 - hosts: k8s_ca
 
   roles:
-    - githubixx.kubernetes-ca
+    - githubixx.kubernetes_ca
 ```
 
 License
