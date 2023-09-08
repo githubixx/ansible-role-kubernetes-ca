@@ -13,7 +13,7 @@ on:
 
 defaults:
   run:
-    working-directory: 'githubixx.kubernetes-ca'
+    working-directory: 'githubixx.kubernetes_ca'
 
 jobs:
   release:
@@ -23,7 +23,7 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v2
         with:
-          path: 'githubixx.kubernetes-ca'
+          path: 'githubixx.kubernetes_ca'
 
       - name: Set up Python 3.
         uses: actions/setup-python@v2
