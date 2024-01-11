@@ -185,7 +185,7 @@ k8s_controller_manager_csr_names_st: "Bayern"
 # which is part of the controller manager won't be able to verify the
 # already existing service accounts anymore. So this might cause trouble
 # for your running pods.
-k8s_controller_manager_sa_csr_cn: "service-accounts"
+k8s_controller_manager_sa_csr_cn: "k8s-service-accounts"
 k8s_controller_manager_sa_csr_key_algo: "rsa"
 k8s_controller_manager_sa_csr_key_size: "2048"
 k8s_controller_manager_sa_csr_names_c: "DE"
