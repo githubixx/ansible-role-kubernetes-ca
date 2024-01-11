@@ -115,7 +115,7 @@ k8s_apiserver_csr_key_algo: "rsa"
 k8s_apiserver_csr_key_size: "2048"
 k8s_apiserver_csr_names_c: "DE"
 k8s_apiserver_csr_names_l: "The_Internet"
-k8s_apiserver_csr_names_o: "Kubernetes"
+k8s_apiserver_csr_names_o: "system:masters" # DO NOT CHANGE!
 k8s_apiserver_csr_names_ou: "BY"
 k8s_apiserver_csr_names_st: "Bayern"
 
