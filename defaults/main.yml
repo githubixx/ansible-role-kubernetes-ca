@@ -1,6 +1,6 @@
 ---
 # The directory where to store the certificates. By default this
-# will expand to user's LOCAL $HOME (the user that run's "ansible-playbook ..."
+# will expand to user's LOCAL $HOME (the user that runs "ansible-playbook ...")
 # plus "/k8s/certs". That means if the user's $HOME directory is e.g.
 # "/home/da_user" then "k8s_ca_conf_directory" will have a value of
 # "/home/da_user/k8s/certs".
@@ -104,6 +104,12 @@ etcd_client_csr_names_st: "Bayern"
 
 # CSR parameter for Kubernetes API server certificate. Used to secure the
 # Kubernetes API server communication.
+#
+# NOTE: It's important that the value of "ca_k8s_apiserver_csr_cn" and
+# "k8s_apiserver_csr_cn" are different! Otherwise Python clients and libraries
+# like "urllib3" and "requests" might have connection issues with the https
+# endpoint of "kube-apiserver". For more details see:
+# https://www.tauceti.blog/posts/kubernetes-the-not-so-hard-way-with-ansible-certificate-authority/
 k8s_apiserver_csr_cn: "k8s-apiserver"
 k8s_apiserver_csr_key_algo: "rsa"
 k8s_apiserver_csr_key_size: "2048"
