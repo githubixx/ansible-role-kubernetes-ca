@@ -1,31 +1,59 @@
-ansible-role-kubernetes-ca
-==========================
+# ansible-role-kubernetes-ca
 
-This role is used in [Kubernetes the not so hard way with Ansible - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-certificate-authority/). It basically creates two CA's: One for etcd and one for Kubernetes components (needed to secure communication of the Kubernetes components). Besides the Kubernetes API server none of the Kubernetes components should have a need to communicate with the etcd cluster directly. For infrastructure components like [Cilium](https://cilium.io/) for K8s networking or [Traefik](https://traefik.io) for ingress it may make sense to reuse the already existing etcd cluster. For more information see [Kubernetes the not so hard way with Ansible - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-certificate-authority/).
+This role is used in [Kubernetes the not so hard way with Ansible - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-certificate-authority/). It basically creates two CA's: One for `etcd` and one for Kubernetes components (needed to secure communication of the Kubernetes components). Besides the Kubernetes API server none of the Kubernetes components should have a need to communicate with the `etcd` cluster directly. For infrastructure components like [Cilium](https://cilium.io/) for K8s networking or [Traefik](https://traefik.io) for ingress it may make sense to reuse the already existing `etcd` cluster. For more information see [Kubernetes the not so hard way with Ansible - Certificate authority (CA)](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-certificate-authority/).
 
-Versions
---------
+## Versions
 
-I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `9.0.0+1.18.4` means this is release 9.0.0 of this role and it's meant to be used with Kubernetes version `1.18.4` (while normally it should work with basically any Kubernetes version >= 1.18.0 but I tested it with the version tagged). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase and also the role patch version will increase (e.g. from `9.0.0` to `9.0.1`). This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release.
+I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `12.0.0+1.28.5` means this is release `12.0.0` of this role and it's meant to be used with Kubernetes version >= `1.28.5` (while normally it should work with basically any Kubernetes version >= 1.18.0 but I tested it with the version tagged). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase and also the role patch version will increase (e.g. from `12.0.0` to `12.0.1`). This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release.
 
-Changelog
----------
+## Changelog
+
+**Change history:**
 
 see [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-ca/blob/master/CHANGELOG.md)
 
-Requirements
-------------
+**Recent changes:**
+
+## 12.0.0+1.28.5
+
+### BREAKING
+
+- change default value of `k8s_controller_manager_sa_csr_cn` from `service-accounts` to `k8s-service-accounts`
+- change default value of `k8s_interface` from `tap0` to `eth0`
+- change default values of `ca_etcd_csr_cn`, `etcd_peer_csr_cn` and `etcd_client_csr_cn_prefix`
+- change default value of `k8s_apiserver_csr_cn` from `kubernetes` to `kube-apiserver`
+
+### OTHER CHANGES
+
+- remove tests directory
+- add `namespace` to `meta/main.yml`
+- update Github workflow
+- add important note to `k8s_apiserver_csr_cn` variable
+- `.ansible-lint`: remove `role-name`
+- remove `vars` directory
+
+### MOLECULE
+
+- remove `requirements.yml`
+- fix `ansible-lint` issues
+- use Ubuntu 22.04 for some VMs
+- change IPs from `192.168.10.0/24` to `172.16.10.0/24`
+- remove `etcd_cert_hosts` variable from `group_vars` (use default setting)
+- remove `role_name_check`
+- extend `verify.yml`
+- Molecule: rename role `harden-linux` to `harden_linux`
+
+## Requirements
 
 This playbook needs [CFSSL](https://github.com/cloudflare/cfssl) PKI toolkit binaries installed. You can use [ansible-role-cfssl](https://github.com/githubixx/ansible-role-cfssl) to install CFSSL locally on your machine. If you want to store the generated certificates and CA's locally or on a network share specify the role variables below in `host_vars/localhost` or in `group_vars/all` e.g.
 
-Role Variables
---------------
+## Role Variables
 
 This playbook has quite a few variables. But that's mainly information needed for the certificates.
 
-```
+```yaml
 # The directory where to store the certificates. By default this
-# will expand to user's LOCAL $HOME (the user that run's "ansible-playbook ..."
+# will expand to user's LOCAL $HOME (the user that runs "ansible-playbook ...")
 # plus "/k8s/certs". That means if the user's $HOME directory is e.g.
 # "/home/da_user" then "k8s_ca_conf_directory" will have a value of
 # "/home/da_user/k8s/certs".
@@ -56,9 +84,9 @@ k8s_ca_worker_nodes_group: "k8s_worker"
 # This role will include the IP address of the interface you specify here in
 # the etcd, kube-apiserver and kubelet certificate SAN (subject alternative name).
 # This is the interface where all the Kubernetes cluster services communicates
-# and should be an encrypted network. Valid interface names are normally:
-# "wg0" (WireGuard), "peervpn0" (PeerVPN) or "tap0".
-k8s_interface: "tap0"
+# and should be an encrypted network. Some examples for interface names:
+# "wg0" (WireGuard), "peervpn0" (PeerVPN), "eth0", "tap0"
+k8s_interface: "eth0"
 
 # Expiry for etcd root certificate
 ca_etcd_expiry: "87600h"
@@ -66,7 +94,7 @@ ca_etcd_expiry: "87600h"
 # Certificate authority (CA) parameters for etcd certificates. This CA is used
 # to sign certificates used by etcd (like peer and server certificates) and
 # etcd clients (like "Kube API Server", "Traefik" and "Cilium" e.g.).
-ca_etcd_csr_cn: "Etcd"
+ca_etcd_csr_cn: "etcd"
 ca_etcd_csr_key_algo: "rsa"
 ca_etcd_csr_key_size: "2048"
 ca_etcd_csr_names_c: "DE"
@@ -94,7 +122,7 @@ ca_k8s_apiserver_csr_names_st: "Bayern"
 # etcd server and verified by client for server identity (for example
 # "Kubernetes API server").
 # etcd parameter: --cert-file and --key-file
-etcd_server_csr_cn: "Etcd"
+etcd_server_csr_cn: "etcd-server"
 etcd_server_csr_key_algo: "rsa"
 etcd_server_csr_key_size: "2048"
 etcd_server_csr_names_c: "DE"
@@ -106,7 +134,7 @@ etcd_server_csr_names_st: "Bayern"
 # CSR parameter for etcd peer certificate. The peer certificate is used by etcd
 # cluster members as they communicate with each other in both ways.
 # etcd parameter: --peer-cert-file and --peer-key-file
-etcd_peer_csr_cn: "Etcd"
+etcd_peer_csr_cn: "etcd-peer"
 etcd_peer_csr_key_algo: "rsa"
 etcd_peer_csr_key_size: "2048"
 etcd_peer_csr_names_c: "DE"
@@ -118,7 +146,7 @@ etcd_peer_csr_names_st: "Bayern"
 # CSR parameter for etcd clients. One such client is "kube-apiserver" e.g.
 # and is defined in "etcd_additional_clients" variable (see below). All
 # certificates issued for etcd clients will use this parameters.
-etcd_client_csr_cn_prefix: "etcd"
+etcd_client_csr_cn_prefix: "etcd-client"
 etcd_client_csr_key_algo: "rsa"
 etcd_client_csr_key_size: "2048"
 etcd_client_csr_names_c: "DE"
@@ -129,7 +157,13 @@ etcd_client_csr_names_st: "Bayern"
 
 # CSR parameter for Kubernetes API server certificate. Used to secure the
 # Kubernetes API server communication.
-k8s_apiserver_csr_cn: "Kubernetes"
+#
+# NOTE: It's important that the value of "ca_k8s_apiserver_csr_cn" and
+# "k8s_apiserver_csr_cn" are different! Otherwise Python clients and libraries
+# like "urllib3" and "requests" might have connection issues with the https
+# endpoint of "kube-apiserver". For more details see:
+# https://www.tauceti.blog/posts/kubernetes-the-not-so-hard-way-with-ansible-certificate-authority/
+k8s_apiserver_csr_cn: "k8s-apiserver"
 k8s_apiserver_csr_key_algo: "rsa"
 k8s_apiserver_csr_key_size: "2048"
 k8s_apiserver_csr_names_c: "DE"
@@ -210,7 +244,7 @@ k8s_controller_manager_csr_names_st: "Bayern"
 # which is part of the controller manager won't be able to verify the
 # already existing service accounts anymore. So this might cause trouble
 # for your running pods.
-k8s_controller_manager_sa_csr_cn: "service-accounts"
+k8s_controller_manager_sa_csr_cn: "k8s-service-accounts"
 k8s_controller_manager_sa_csr_key_algo: "rsa"
 k8s_controller_manager_sa_csr_key_size: "2048"
 k8s_controller_manager_sa_csr_names_c: "DE"
@@ -274,22 +308,19 @@ etcd_additional_clients:
   - k8s-apiserver-etcd
 ```
 
-Example Playbook
-----------------
+## Example Playbook
 
-```
+```yaml
 - hosts: k8s_ca
 
   roles:
     - githubixx.kubernetes_ca
 ```
 
-License
--------
+## License
 
 GNU GENERAL PUBLIC LICENSE Version 3
 
-Author Information
-------------------
+## Author Information
 
 [http://www.tauceti.blog](http://www.tauceti.blog)
