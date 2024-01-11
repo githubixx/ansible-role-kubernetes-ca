@@ -21,38 +21,6 @@ k8s_apiserver_csr_cn: "kubernetes"
 k8s_admin_csr_cn: "admin"
 k8s_controller_manager_sa_csr_cn: "service-accounts"
 
-etcd_cert_hosts:
-  - localhost
-  - 127.0.0.1
-  - 10.32.0.1
-  - kubernetes
-  - kubernetes.default
-  - kubernetes.default.svc
-  - kubernetes.default.svc.cluster
-  - kubernetes.svc.cluster.local
-  - 192.168.10.5
-  - 192.168.10.10
-  - 192.168.10.20
-  - 192.168.10.30
-  - 192.168.10.100
-  - 192.168.10.110
-  - 192.168.10.120
-  - 192.168.10.130
-  - 10.10.10.5
-  - 10.10.10.10
-  - 10.10.10.20
-  - 10.10.10.30
-  - 10.10.10.100
-  - 10.10.10.110
-  - 10.10.10.120
-  - 10.10.10.130
-  - test-controller1
-  - test-controller2
-  - test-controller3
-  - test-worker1
-  - test-worker2
-  - test-worker3
-
 harden_linux_ntp: "systemd-timesyncd"
 
 # Password for user "root" and "k8s" is "k8s" in both cases
