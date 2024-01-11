@@ -9,7 +9,7 @@
   gather_facts: true
   tasks:
     - name: Update APT package cache
-      apt:
+      ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
 
@@ -19,9 +19,9 @@
   become: true
   gather_facts: true
   tasks:
-    - name: Setup harden-linux role
-      include_role:
-        name: githubixx.harden-linux
+    - name: Setup harden_linux role
+      ansible.builtin.include_role:
+        name: githubixx.harden_linux
 
 - name: Setup Wireguard VPN
   hosts: vpn
@@ -30,7 +30,7 @@
   gather_facts: true
   tasks:
     - name: Setup wireguard role
-      include_role:
+      ansible.builtin.include_role:
         name: githubixx.ansible_role_wireguard
 
 - name: Setup cfssl
@@ -39,5 +39,5 @@
   gather_facts: false
   tasks:
     - name: Install cfssl
-      include_role:
+      ansible.builtin.include_role:
         name: githubixx.cfssl

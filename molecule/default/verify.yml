@@ -1,6 +1,6 @@
 ---
 # Copyright (C) 2023 Robert Wimmer
-# SPDX-License-Identifier: GPL-3.0-or-later 
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 - name: Verify setup
   hosts: test-assets
@@ -54,7 +54,18 @@
         set -o errexit
         set -o pipefail
         set -o nounset
-        openssl x509 -in {{ k8s_ca_conf_directory }}/cert-k8s-controller-manager-sa.pem -text -noout | grep -q "CN = service-accounts"
+        openssl x509 -in {{ k8s_ca_conf_directory }}/cert-k8s-controller-manager-sa.pem -text -noout | grep -q "CN = k8s-service-accounts"
+        exit 0
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Check if OpenSSL matches ca-k8s-apiserver.pem and cert-k8s-apiserver.pem
+      ansible.builtin.shell: |
+        set -o errexit
+        set -o pipefail
+        set -o nounset
+        openssl verify -verbose -x509_strict -CAfile {{ k8s_ca_conf_directory }}/ca-k8s-apiserver.pem {{ k8s_ca_conf_directory }}/cert-k8s-apiserver.pem
         exit 0
       args:
         executable: /bin/bash
