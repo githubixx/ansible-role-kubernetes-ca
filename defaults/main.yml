@@ -104,7 +104,7 @@ etcd_client_csr_names_st: "Bayern"
 
 # CSR parameter for Kubernetes API server certificate. Used to secure the
 # Kubernetes API server communication.
-k8s_apiserver_csr_cn: "Kubernetes"
+k8s_apiserver_csr_cn: "k8s-apiserver"
 k8s_apiserver_csr_key_algo: "rsa"
 k8s_apiserver_csr_key_size: "2048"
 k8s_apiserver_csr_names_c: "DE"
