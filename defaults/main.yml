@@ -31,9 +31,9 @@ k8s_ca_worker_nodes_group: "k8s_worker"
 # This role will include the IP address of the interface you specify here in
 # the etcd, kube-apiserver and kubelet certificate SAN (subject alternative name).
 # This is the interface where all the Kubernetes cluster services communicates
-# and should be an encrypted network. Valid interface names are normally:
-# "wg0" (WireGuard), "peervpn0" (PeerVPN) or "tap0".
-k8s_interface: "tap0"
+# and should be an encrypted network. Some examples for interface names:
+# "wg0" (WireGuard), "peervpn0" (PeerVPN), "eth0", "tap0"
+k8s_interface: "eth0"
 
 # Expiry for etcd root certificate
 ca_etcd_expiry: "87600h"
@@ -41,7 +41,7 @@ ca_etcd_expiry: "87600h"
 # Certificate authority (CA) parameters for etcd certificates. This CA is used
 # to sign certificates used by etcd (like peer and server certificates) and
 # etcd clients (like "Kube API Server, "Traefik" and "Cilium" e.g.).
-ca_etcd_csr_cn: "Etcd"
+ca_etcd_csr_cn: "etcd"
 ca_etcd_csr_key_algo: "rsa"
 ca_etcd_csr_key_size: "2048"
 ca_etcd_csr_names_c: "DE"
@@ -69,7 +69,7 @@ ca_k8s_apiserver_csr_names_st: "Bayern"
 # etcd server and verified by client for server identity (for example
 # "Kubernetes API server").
 # etcd parameter: --cert-file and --key-file
-etcd_server_csr_cn: "Etcd"
+etcd_server_csr_cn: "etcd-server"
 etcd_server_csr_key_algo: "rsa"
 etcd_server_csr_key_size: "2048"
 etcd_server_csr_names_c: "DE"
@@ -81,7 +81,7 @@ etcd_server_csr_names_st: "Bayern"
 # CSR parameter for etcd peer certificate. The peer certificate is used by etcd
 # cluster members as they communicate with each other in both ways.
 # etcd parameter: --peer-cert-file and --peer-key-file
-etcd_peer_csr_cn: "Etcd"
+etcd_peer_csr_cn: "etcd-peer"
 etcd_peer_csr_key_algo: "rsa"
 etcd_peer_csr_key_size: "2048"
 etcd_peer_csr_names_c: "DE"
@@ -93,7 +93,7 @@ etcd_peer_csr_names_st: "Bayern"
 # CSR parameter for etcd clients. One such client is "kube-apiserver" e.g.
 # and is defined in "etcd_additional_clients" variable (see below). All
 # certificates issued for etcd clients will use this parameters.
-etcd_client_csr_cn_prefix: "etcd"
+etcd_client_csr_cn_prefix: "etcd-client"
 etcd_client_csr_key_algo: "rsa"
 etcd_client_csr_key_size: "2048"
 etcd_client_csr_names_c: "DE"
