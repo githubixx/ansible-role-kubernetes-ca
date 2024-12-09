@@ -474,6 +474,7 @@
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
       -config=ca-k8s-apiserver-config.json \
+      -hostname={{ k8s_api_hosts }} \
       -profile=kubernetes \
       cert-k8s-controller-manager-csr.json \
     | cfssljson -bare cert-k8s-controller-manager
