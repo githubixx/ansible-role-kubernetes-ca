@@ -70,3 +70,85 @@
       args:
         executable: /bin/bash
       changed_when: false
+
+    - name: Read etcd CA notAfter
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - x509
+          - -in
+          - "{{ k8s_ca_conf_directory }}/ca-etcd.pem"
+          - -enddate
+          - -noout
+      register: etcd_ca_notafter_raw
+      changed_when: false
+
+    - name: Read etcd server cert notAfter
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - x509
+          - -in
+          - "{{ k8s_ca_conf_directory }}/cert-etcd-server.pem"
+          - -enddate
+          - -noout
+      register: etcd_server_notafter_raw
+      changed_when: false
+
+    - name: Assert etcd CA expiry covers issued server cert
+      vars:
+        openssl_notafter_format: "%b %d %H:%M:%S %Y %Z"
+        etcd_ca_notafter: "{{ etcd_ca_notafter_raw.stdout | regex_replace('^notAfter=', '') }}"
+        etcd_server_notafter: "{{ etcd_server_notafter_raw.stdout | regex_replace('^notAfter=', '') }}"
+        etcd_ca_notafter_dt: "{{ etcd_ca_notafter | to_datetime(openssl_notafter_format) }}"
+        etcd_server_notafter_dt: "{{ etcd_server_notafter | to_datetime(openssl_notafter_format) }}"
+      ansible.builtin.assert:
+        that:
+          - etcd_server_notafter_dt <= etcd_ca_notafter_dt
+        fail_msg: |-
+          etcd server certificate expires after etcd CA (issue #16)
+          CA notAfter:   {{ etcd_ca_notafter }}
+          Cert notAfter: {{ etcd_server_notafter }}
+        success_msg: "etcd CA expiry covers issued server certificate"
+        quiet: true
+
+    - name: Read Kubernetes CA notAfter
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - x509
+          - -in
+          - "{{ k8s_ca_conf_directory }}/ca-k8s-apiserver.pem"
+          - -enddate
+          - -noout
+      register: k8s_ca_notafter_raw
+      changed_when: false
+
+    - name: Read kube-apiserver cert notAfter
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - x509
+          - -in
+          - "{{ k8s_ca_conf_directory }}/cert-k8s-apiserver.pem"
+          - -enddate
+          - -noout
+      register: k8s_apiserver_notafter_raw
+      changed_when: false
+
+    - name: Assert Kubernetes CA expiry covers kube-apiserver cert
+      vars:
+        openssl_notafter_format: "%b %d %H:%M:%S %Y %Z"
+        k8s_ca_notafter: "{{ k8s_ca_notafter_raw.stdout | regex_replace('^notAfter=', '') }}"
+        k8s_apiserver_notafter: "{{ k8s_apiserver_notafter_raw.stdout | regex_replace('^notAfter=', '') }}"
+        k8s_ca_notafter_dt: "{{ k8s_ca_notafter | to_datetime(openssl_notafter_format) }}"
+        k8s_apiserver_notafter_dt: "{{ k8s_apiserver_notafter | to_datetime(openssl_notafter_format) }}"
+      ansible.builtin.assert:
+        that:
+          - k8s_apiserver_notafter_dt <= k8s_ca_notafter_dt
+        fail_msg: |-
+          kube-apiserver certificate expires after Kubernetes CA (issue #16)
+          CA notAfter:   {{ k8s_ca_notafter }}
+          Cert notAfter: {{ k8s_apiserver_notafter }}
+        success_msg: "Kubernetes CA expiry covers kube-apiserver certificate"
+        quiet: true
