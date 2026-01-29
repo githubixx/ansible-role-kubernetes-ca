@@ -4,7 +4,7 @@ This role is used in [Kubernetes the not so hard way with Ansible - Certificate 
 
 ## Versions
 
-I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `12.0.0+1.28.5` means this is release `12.0.0` of this role and it's meant to be used with Kubernetes version >= `1.28.5` (while normally it should work with basically any Kubernetes version >= 1.18.0 but I tested it with the version tagged). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase and also the role patch version will increase (e.g. from `12.0.0` to `12.0.1`). This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release.
+I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `13.0.0+1.33.0` means this is release `13.0.0` of this role and it's meant to be used with Kubernetes version >= `1.33.0` (while normally it should work with basically any Kubernetes version >= 1.18.0 but I tested it with the version tagged). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase and also the role patch version will increase (e.g. from `13.0.0` to `13.0.1`). This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release.
 
 ## Changelog
 
@@ -14,34 +14,49 @@ see [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-ca/blob/
 
 **Recent changes:**
 
+## 13.0.0+1.33.0
+
+- **OTHER**
+
+  - replace injected `ansible_*` facts usage with `ansible_facts[...]` (prepares for ansible-core 2.24 where INJECT_FACTS_AS_VARS default changes)
+  - update `.yamllint`
+  - update `.github/workflows/release.yml`
+  - update `.gitignore`
+
+- **MOLECULE**
+
+  - use Ubuntu 22.04 for some VMs
+  - replace `generic/ubuntu2004` -> `alvistack/ubuntu-24.04`
+  - replace `generic/ubuntu2004` -> `alvistack/ubuntu-24.04`
+
 ## 12.0.0+1.28.5
 
-### BREAKING
+- **BREAKING**
 
-- change default value of `k8s_controller_manager_sa_csr_cn` from `service-accounts` to `k8s-service-accounts`
-- change default value of `k8s_interface` from `tap0` to `eth0`
-- change default values of `ca_etcd_csr_cn`, `etcd_peer_csr_cn` and `etcd_client_csr_cn_prefix`
-- change default value of `k8s_apiserver_csr_cn` from `kubernetes` to `kube-apiserver`
+  - change default value of `k8s_controller_manager_sa_csr_cn` from `service-accounts` to `k8s-service-accounts`
+  - change default value of `k8s_interface` from `tap0` to `eth0`
+  - change default values of `ca_etcd_csr_cn`, `etcd_peer_csr_cn` and `etcd_client_csr_cn_prefix`
+  - change default value of `k8s_apiserver_csr_cn` from `kubernetes` to `kube-apiserver`
 
-### OTHER CHANGES
+- **OTHER**
 
-- remove tests directory
-- add `namespace` to `meta/main.yml`
-- update Github workflow
-- add important note to `k8s_apiserver_csr_cn` variable
-- `.ansible-lint`: remove `role-name`
-- remove `vars` directory
+  - remove tests directory
+  - add `namespace` to `meta/main.yml`
+  - update Github workflow
+  - add important note to `k8s_apiserver_csr_cn` variable
+  - `.ansible-lint`: remove `role-name`
+  - remove `vars` directory
 
-### MOLECULE
+- **MOLECULE**
 
-- remove `requirements.yml`
-- fix `ansible-lint` issues
-- use Ubuntu 22.04 for some VMs
-- change IPs from `192.168.10.0/24` to `172.16.10.0/24`
-- remove `etcd_cert_hosts` variable from `group_vars` (use default setting)
-- remove `role_name_check`
-- extend `verify.yml`
-- Molecule: rename role `harden-linux` to `harden_linux`
+  - remove `requirements.yml`
+  - fix `ansible-lint` issues
+  - use Ubuntu 22.04 for some VMs
+  - change IPs from `192.168.10.0/24` to `172.16.10.0/24`
+  - remove `etcd_cert_hosts` variable from `group_vars` (use default setting)
+  - remove `role_name_check`
+  - extend `verify.yml`
+  - Molecule: rename role `harden-linux` to `harden_linux`
 
 ## Requirements
 
@@ -107,7 +122,7 @@ ca_etcd_csr_names_st: "Bayern"
 ca_k8s_apiserver_expiry: "87600h"
 
 # Certificate authority (CA) parameters for Kubernetes API server. The CA is
-# used to sign certifcates for various Kubernetes services like Kubernetes API
+# used to sign certificates for various Kubernetes services like Kubernetes API
 # server e.g.
 ca_k8s_apiserver_csr_cn: "Kubernetes"
 ca_k8s_apiserver_csr_key_algo: "rsa"

@@ -1,35 +1,50 @@
 # CHANGELOG
 
+## 13.0.0+1.33.0
+
+- **OTHER**
+
+  - replace injected `ansible_*` facts usage with `ansible_facts[...]` (prepares for ansible-core 2.24 where INJECT_FACTS_AS_VARS default changes)
+  - update `.yamllint`
+  - update `.github/workflows/release.yml`
+  - update `.gitignore`
+
+- **MOLECULE**
+
+  - use Ubuntu 22.04 for some VMs
+  - replace `generic/ubuntu2004` -> `alvistack/ubuntu-24.04`
+  - replace `generic/ubuntu2004` -> `alvistack/ubuntu-24.04`
+
 ## 12.0.0+1.28.5
 
-### BREAKING
+- **BREAKING**
 
-- change default value of `k8s_controller_manager_sa_csr_cn` from `service-accounts` to `k8s-service-accounts`
-- change default value of `k8s_interface` from `tap0` to `eth0`
-- change default values of `ca_etcd_csr_cn`, `etcd_peer_csr_cn` and `etcd_client_csr_cn_prefix`
-- change default value of `k8s_apiserver_csr_cn` from `kubernetes` to `kube-apiserver`
+  - change default value of `k8s_controller_manager_sa_csr_cn` from `service-accounts` to `k8s-service-accounts`
+  - change default value of `k8s_interface` from `tap0` to `eth0`
+  - change default values of `ca_etcd_csr_cn`, `etcd_peer_csr_cn` and `etcd_client_csr_cn_prefix`
+  - change default value of `k8s_apiserver_csr_cn` from `kubernetes` to `kube-apiserver`
 
-### OTHER CHANGES
+- **OTHER**
 
-- remove tests directory
-- add `namespace` to `meta/main.yml`
-- update Github workflow
-- add important note to `k8s_apiserver_csr_cn` variable
-- `.ansible-lint`: remove `role-name`
-- remove `vars` directory
-- remove `handlers` directory
-- remove `files` directory
+  - remove tests directory
+  - add `namespace` to `meta/main.yml`
+  - update Github workflow
+  - add important note to `k8s_apiserver_csr_cn` variable
+  - `.ansible-lint`: remove `role-name`
+  - remove `vars` directory
+  - remove `handlers` directory
+  - remove `files` directory
 
-### MOLECULE
+- **MOLECULE**
 
-- remove `requirements.yml`
-- fix `ansible-lint` issues
-- use Ubuntu 22.04 for some VMs
-- change IPs from `192.168.10.0/24` to `172.16.10.0/24`
-- remove `etcd_cert_hosts` variable from `group_vars` (use default setting)
-- remove `role_name_check`
-- extend `verify.yml`
-- Molecule: rename role `harden-linux` to `harden_linux`
+  - remove `requirements.yml`
+  - fix `ansible-lint` issues
+  - use Ubuntu 22.04 for some VMs
+  - change IPs from `192.168.10.0/24` to `172.16.10.0/24`
+  - remove `etcd_cert_hosts` variable from `group_vars` (use default setting)
+  - remove `role_name_check`
+  - extend `verify.yml`
+  - Molecule: rename role `harden-linux` to `harden_linux`
 
 ## 11.0.0+1.18.4
 
@@ -54,7 +69,7 @@
 
 ## 9.0.0+1.18.4
 
-- splitted etcd profiles in `server`, `peer` and `client`. This makes it possible to have separate certificate files for `etcd`. E.g. the TLS parameters for `etcd` now looks like this:
+- split etcd profiles in `server`, `peer` and `client`. This makes it possible to have separate certificate files for `etcd`. E.g. the TLS parameters for `etcd` now looks like this:
 
 ```plain
 --cert-file=cert-etcd-server.pem
