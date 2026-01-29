@@ -16,6 +16,11 @@ see [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-ca/blob/
 
 ## 13.0.0+1.33.0
 
+- **POTENTIALLY BREAKING/FIX**
+
+  - Set CFSSL CA CSR "CA.expiry" so CA cert validity matches `ca_*_expiry` (issue #16). Previously, the role set the expiry for issued certificates via the CFSSL signing profiles, but did not explicitly set the expiry for the CA certificate created with `cfssl gencert -initca`. CFSSL then used its default CA lifetime (often ~5 years), which can result in leaf certificates that appear valid "longer" than the CA that issued them.  
+  **What this means for existing users**: Nothing breaks immediately after upgrading the role. But if your CA certificate (`ca-etcd.pem` / `ca-k8s-apiserver.pem`) was generated with the old behavior, it may expire earlier than you expect, and the whole chain becomes unusable at the CA’s expiry date even if leaf certs have later notAfter dates. This change only affects newly generated CA certificates. Existing CA files won’t be replaced automatically (the role uses creates:), so to benefit you must rotate/regenerate the CA (and any certs signed by it) or delete the existing CA artifacts so they’re recreated with the configured `ca_*_expiry`.
+
 - **OTHER**
 
   - increase `min_ansible_version` to `2.10` in `meta/main.yml`
