@@ -18,6 +18,7 @@ see [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-ca/blob/
 
 - **OTHER**
 
+  - increase `min_ansible_version` to `2.10` in `meta/main.yml`
   - replace injected `ansible_*` facts usage with `ansible_facts[...]` (prepares for ansible-core 2.24 where INJECT_FACTS_AS_VARS default changes)
   - update `.yamllint`
   - update `.github/workflows/release.yml`
