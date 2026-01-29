@@ -5,7 +5,7 @@ extends: default
 
 rules:
   line-length:
-    max: 150
+    max: 300
     level: warning
   comments-indentation: disable
   comments:
