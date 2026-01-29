@@ -9,7 +9,7 @@
   ansible.builtin.set_fact:
     k8s_api_hosts: >-
       {% set comma = joiner(",") %}{% for item in groups[k8s_ca_controller_nodes_group] -%}
-        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_" + hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+        {{ comma() }}{{ hostvars[item].ansible_facts['default_ipv4']['address'] }}{{ comma() }}{{ hostvars[item].ansible_facts[hostvars[item]['k8s_interface']]['ipv4']['address'] }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item].ansible_facts['hostname'] }}
       {%- endfor %}{% for item in k8s_apiserver_cert_hosts -%}
         {{ comma() }}{{ item }}
       {%- endfor %}
@@ -27,7 +27,7 @@
   ansible.builtin.set_fact:
     etcd_hosts: >-
       {% set comma = joiner(",") %}{% for item in groups[k8s_ca_etcd_nodes_group] -%}
-        {{ comma() }}{{ hostvars[item].ansible_default_ipv4.address }}{{ comma() }}{{ hostvars[item]["ansible_" + hostvars[item]["k8s_interface"]].ipv4.address }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item]["ansible_hostname"] }}
+        {{ comma() }}{{ hostvars[item].ansible_facts['default_ipv4']['address'] }}{{ comma() }}{{ hostvars[item].ansible_facts[hostvars[item]['k8s_interface']]['ipv4']['address'] }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item].ansible_facts['hostname'] }}
       {%- endfor %}{% for item in etcd_cert_hosts -%}
         {{ comma() }}{{ item }}
       {%- endfor %}
@@ -382,7 +382,7 @@
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
       -config=ca-k8s-apiserver-config.json \
-      -hostname={{ hostvars[item]['ansible_hostname'] }},{{ hostvars[item]['ansible_default_ipv4']['address'] }},{{ hostvars[item]['ansible_' + hostvars[item]['k8s_interface']].ipv4.address }} \
+      -hostname={{ hostvars[item].ansible_facts['hostname'] }},{{ hostvars[item].ansible_facts['default_ipv4']['address'] }},{{ hostvars[item].ansible_facts[hostvars[item]['k8s_interface']]['ipv4']['address'] }} \
       -profile=kubernetes \
       cert-{{ item }}-csr.json \
     | cfssljson -bare cert-{{ item }}
