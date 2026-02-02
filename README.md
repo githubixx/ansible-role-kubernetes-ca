@@ -20,6 +20,7 @@ see [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-ca/blob/
 
   - Set CFSSL CA CSR `CA.expiry` so CA cert validity matches `ca_*_expiry` (fixes [#16](https://github.com/githubixx/ansible-role-kubernetes-ca/issues/16)). Previously, the role set the expiry for issued certificates via the CFSSL signing profiles, but did not explicitly set the expiry for the CA certificate created with `cfssl gencert -initca`. CFSSL then used its default CA lifetime (often ~5 years), which can result in leaf certificates that appear valid "longer" than the CA that issued them.  
   **What this means for existing users**: Nothing breaks immediately after upgrading the role. But if your CA certificate (`ca-etcd.pem` / `ca-k8s-apiserver.pem`) was generated with the old behavior, it may expire earlier than you expect, and the whole chain becomes unusable at the CA’s expiry date even if leaf certs have later notAfter dates. This change only affects newly generated CA certificates. Existing CA files won’t be replaced automatically (the role uses creates:), so to benefit you must rotate/regenerate the CA (and any certs signed by it) or delete the existing CA artifacts so they’re recreated with the configured `ca_*_expiry`.
+  - Fix follow-up for [#16](https://github.com/githubixx/ansible-role-kubernetes-ca/issues/16): introduce `ca_etcd_root_expiry` / `ca_k8s_apiserver_root_expiry` (used for the root CA cert created via `cfssl gencert -initca`) so the root CA certificate outlives issued certificates by default. This avoids edge cases where CA and leaf certs use the same duration and the CA appears to expire slightly earlier due to issuance-time differences.
   - Fix for [issue #14](https://github.com/githubixx/ansible-role-kubernetes-ca/issues/14): `kube-controller-manager` certificate does not contain any SANs - causing problems when scraping its metrics
 
 - **OTHER**
@@ -35,6 +36,8 @@ see [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-ca/blob/
   - use Ubuntu 22.04 for some VMs
   - replace `generic/ubuntu2004` -> `alvistack/ubuntu-24.04`
   - replace `generic/ubuntu2004` -> `alvistack/ubuntu-24.04`
+  - remove previously generated CA/cert artifacts before running the role, so Molecule runs always test current templates/expiry behavior
+  - include `verify` in Molecule `test_sequence`
 
 ## 12.0.0+1.28.5
 
@@ -110,8 +113,16 @@ k8s_ca_worker_nodes_group: "k8s_worker"
 # "wg0" (WireGuard), "peervpn0" (PeerVPN), "eth0", "tap0"
 k8s_interface: "eth0"
 
-# Expiry for etcd root certificate
+# Expiry for etcd certificates issued by the etcd CA signing profiles.
+# NOTE: If CA and issued certificates have exactly the same expiry duration,
+# the CA can end up expiring slightly before the issued certificates (because
+# the issued certs are generated after the CA). Use "ca_etcd_root_expiry" to
+# ensure the CA certificate outlives issued certificates.
 ca_etcd_expiry: "87600h"
+
+# Expiry for the etcd root CA certificate itself (cfssl "-initca").
+# Must be longer than "ca_etcd_expiry".
+ca_etcd_root_expiry: "87624h"
 
 # Certificate authority (CA) parameters for etcd certificates. This CA is used
 # to sign certificates used by etcd (like peer and server certificates) and
@@ -125,8 +136,17 @@ ca_etcd_csr_names_o: "Kubernetes"
 ca_etcd_csr_names_ou: "BY"
 ca_etcd_csr_names_st: "Bayern"
 
-# Expiry for Kubernetes API server root certificate
+# Expiry for certificates issued by the Kubernetes CA signing profiles.
+# NOTE: If CA and issued certificates have exactly the same expiry duration,
+# the CA can end up expiring slightly before the issued certificates (because
+# the issued certs are generated after the CA). Use
+# "ca_k8s_apiserver_root_expiry" to ensure the CA certificate outlives issued
+# certificates.
 ca_k8s_apiserver_expiry: "87600h"
+
+# Expiry for the Kubernetes root CA certificate itself (cfssl "-initca").
+# Must be longer than "ca_k8s_apiserver_expiry".
+ca_k8s_apiserver_root_expiry: "87624h"
 
 # Certificate authority (CA) parameters for Kubernetes API server. The CA is
 # used to sign certificates for various Kubernetes services like Kubernetes API

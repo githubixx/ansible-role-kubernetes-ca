@@ -110,6 +110,7 @@ scenario:
   test_sequence:
     - prepare
     - converge
+    - verify
 
 verifier:
   name: ansible

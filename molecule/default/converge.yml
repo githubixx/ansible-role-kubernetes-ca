@@ -7,6 +7,11 @@
   become: true
   gather_facts: false
   tasks:
+    - name: Remove existing CA/cert artifacts (Molecule)
+      ansible.builtin.file:
+        path: "{{ k8s_ca_conf_directory }}"
+        state: absent
+
     - name: Generate etcd and K8s TLS certificates
       ansible.builtin.include_role:
         name: githubixx.kubernetes_ca
