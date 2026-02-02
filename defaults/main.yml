@@ -54,7 +54,7 @@ ca_etcd_csr_names_st: "Bayern"
 ca_k8s_apiserver_expiry: "87600h"
 
 # Certificate authority (CA) parameters for Kubernetes API server. The CA is
-# used to sign certifcates for various Kubernetes services like Kubernetes API
+# used to sign certificates for various Kubernetes services like Kubernetes API
 # server e.g.
 ca_k8s_apiserver_csr_cn: "Kubernetes"
 ca_k8s_apiserver_csr_key_algo: "rsa"
@@ -231,6 +231,12 @@ k8s_apiserver_cert_hosts:
   - kubernetes.default.svc
   - kubernetes.default.svc.cluster
   - kubernetes.default.svc.cluster.local
+
+# Additional hostnames/IPs to include in the kube-controller-manager serving
+# certificate SAN list. By default, the role will include all controller node
+# hostnames and IPs (inventory name, hostname, default IPv4, and k8s_interface
+# IPv4). Use this list to add extra names (e.g. a load balancer DNS name).
+k8s_controller_manager_cert_hosts: []
 
 # This list should contain all etcd clients that wants to connect to the etcd
 # cluster. The most important client is "kube-apiserver" of course. So you

@@ -23,6 +23,17 @@
   tags:
     - kubernetes-ca
 
+- name: Generate list of IP addresses and hostnames needed for kube-controller-manager certificate
+  ansible.builtin.set_fact:
+    k8s_controller_manager_hosts: >-
+      {% set comma = joiner(",") %}{% for item in groups[k8s_ca_controller_nodes_group] -%}
+        {{ comma() }}{{ hostvars[item].ansible_facts['default_ipv4']['address'] }}{{ comma() }}{{ hostvars[item].ansible_facts[hostvars[item]['k8s_interface']]['ipv4']['address'] }}{{ comma() }}{{ item }}{{ comma() }}{{ hostvars[item].ansible_facts['hostname'] }}
+      {%- endfor %}{% for item in k8s_controller_manager_cert_hosts -%}
+        {{ comma() }}{{ item }}
+      {%- endfor %}
+  tags:
+    - kubernetes-ca
+
 - name: Generate list of IP addresses and hostnames needed for etcd certificate
   ansible.builtin.set_fact:
     etcd_hosts: >-
@@ -474,6 +485,7 @@
       -ca=ca-k8s-apiserver.pem \
       -ca-key=ca-k8s-apiserver-key.pem \
       -config=ca-k8s-apiserver-config.json \
+      -hostname={{ k8s_controller_manager_hosts }} \
       -profile=kubernetes \
       cert-k8s-controller-manager-csr.json \
     | cfssljson -bare cert-k8s-controller-manager

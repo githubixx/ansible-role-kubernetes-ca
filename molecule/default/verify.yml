@@ -152,3 +152,54 @@
           Cert notAfter: {{ k8s_apiserver_notafter }}
         success_msg: "Kubernetes CA expiry covers kube-apiserver certificate"
         quiet: true
+
+    - name: Collect certificate validity and SAN details
+      ansible.builtin.shell: |
+        set -o errexit
+        set -o pipefail
+        set -o nounset
+
+        cert_file="{{ k8s_ca_conf_directory }}/{{ item.file }}"
+
+        echo "=== {{ item.label }} ({{ item.file }}) ==="
+        openssl x509 -in "$cert_file" -noout -subject -startdate -enddate
+
+        echo "subjectAltName:"
+        set +e
+        san_line="$(openssl x509 -in "$cert_file" -noout -ext subjectAltName 2>/dev/null | awk 'NR==2{print}')"
+        rc=$?
+        set -e
+
+        if [[ "$rc" -eq 0 ]] && [[ -n "$san_line" ]]; then
+          echo "  $(echo "$san_line" | sed 's/^[[:space:]]*//')"
+        else
+          echo "  <none>"
+        fi
+      args:
+        executable: /bin/bash
+      register: cert_info
+      changed_when: false
+      loop:
+        - label: "etcd CA"
+          file: "ca-etcd.pem"
+        - label: "etcd server"
+          file: "cert-etcd-server.pem"
+        - label: "Kubernetes CA"
+          file: "ca-k8s-apiserver.pem"
+        - label: "kube-apiserver"
+          file: "cert-k8s-apiserver.pem"
+        - label: "kube-controller-manager"
+          file: "cert-k8s-controller-manager.pem"
+        - label: "kube-scheduler"
+          file: "cert-k8s-scheduler.pem"
+        - label: "kube-proxy"
+          file: "cert-k8s-proxy.pem"
+        - label: "kubelet (test-worker1)"
+          file: "cert-test-worker1.pem"
+        - label: "kubelet (test-worker2)"
+          file: "cert-test-worker2.pem"
+
+    - name: Output certificate validity and SAN details
+      ansible.builtin.debug:
+        msg: "{{ item.stdout_lines }}"
+      loop: "{{ cert_info.results }}"
