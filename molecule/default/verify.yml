@@ -1,5 +1,5 @@
 ---
-# Copyright (C) 2023 Robert Wimmer
+# Copyright (C) 2023-2026 Robert Wimmer
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 - name: Verify setup
@@ -70,3 +70,136 @@
       args:
         executable: /bin/bash
       changed_when: false
+
+    - name: Read etcd CA notAfter
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - x509
+          - -in
+          - "{{ k8s_ca_conf_directory }}/ca-etcd.pem"
+          - -enddate
+          - -noout
+      register: etcd_ca_notafter_raw
+      changed_when: false
+
+    - name: Read etcd server cert notAfter
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - x509
+          - -in
+          - "{{ k8s_ca_conf_directory }}/cert-etcd-server.pem"
+          - -enddate
+          - -noout
+      register: etcd_server_notafter_raw
+      changed_when: false
+
+    - name: Assert etcd CA expiry covers issued server cert
+      vars:
+        openssl_notafter_format: "%b %d %H:%M:%S %Y %Z"
+        etcd_ca_notafter: "{{ etcd_ca_notafter_raw.stdout | regex_replace('^notAfter=', '') }}"
+        etcd_server_notafter: "{{ etcd_server_notafter_raw.stdout | regex_replace('^notAfter=', '') }}"
+        etcd_ca_notafter_dt: "{{ etcd_ca_notafter | to_datetime(openssl_notafter_format) }}"
+        etcd_server_notafter_dt: "{{ etcd_server_notafter | to_datetime(openssl_notafter_format) }}"
+      ansible.builtin.assert:
+        that:
+          - etcd_server_notafter_dt <= etcd_ca_notafter_dt
+        fail_msg: |-
+          etcd server certificate expires after etcd CA (issue #16)
+          CA notAfter:   {{ etcd_ca_notafter }}
+          Cert notAfter: {{ etcd_server_notafter }}
+        success_msg: "etcd CA expiry covers issued server certificate"
+        quiet: true
+
+    - name: Read Kubernetes CA notAfter
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - x509
+          - -in
+          - "{{ k8s_ca_conf_directory }}/ca-k8s-apiserver.pem"
+          - -enddate
+          - -noout
+      register: k8s_ca_notafter_raw
+      changed_when: false
+
+    - name: Read kube-apiserver cert notAfter
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - x509
+          - -in
+          - "{{ k8s_ca_conf_directory }}/cert-k8s-apiserver.pem"
+          - -enddate
+          - -noout
+      register: k8s_apiserver_notafter_raw
+      changed_when: false
+
+    - name: Assert Kubernetes CA expiry covers kube-apiserver cert
+      vars:
+        openssl_notafter_format: "%b %d %H:%M:%S %Y %Z"
+        k8s_ca_notafter: "{{ k8s_ca_notafter_raw.stdout | regex_replace('^notAfter=', '') }}"
+        k8s_apiserver_notafter: "{{ k8s_apiserver_notafter_raw.stdout | regex_replace('^notAfter=', '') }}"
+        k8s_ca_notafter_dt: "{{ k8s_ca_notafter | to_datetime(openssl_notafter_format) }}"
+        k8s_apiserver_notafter_dt: "{{ k8s_apiserver_notafter | to_datetime(openssl_notafter_format) }}"
+      ansible.builtin.assert:
+        that:
+          - k8s_apiserver_notafter_dt <= k8s_ca_notafter_dt
+        fail_msg: |-
+          kube-apiserver certificate expires after Kubernetes CA (issue #16)
+          CA notAfter:   {{ k8s_ca_notafter }}
+          Cert notAfter: {{ k8s_apiserver_notafter }}
+        success_msg: "Kubernetes CA expiry covers kube-apiserver certificate"
+        quiet: true
+
+    - name: Collect certificate validity and SAN details
+      ansible.builtin.shell: |
+        set -o errexit
+        set -o pipefail
+        set -o nounset
+
+        cert_file="{{ k8s_ca_conf_directory }}/{{ item.file }}"
+
+        echo "=== {{ item.label }} ({{ item.file }}) ==="
+        openssl x509 -in "$cert_file" -noout -subject -startdate -enddate
+
+        echo "subjectAltName:"
+        set +e
+        san_line="$(openssl x509 -in "$cert_file" -noout -ext subjectAltName 2>/dev/null | awk 'NR==2{print}')"
+        rc=$?
+        set -e
+
+        if [[ "$rc" -eq 0 ]] && [[ -n "$san_line" ]]; then
+          echo "  $(echo "$san_line" | sed 's/^[[:space:]]*//')"
+        else
+          echo "  <none>"
+        fi
+      args:
+        executable: /bin/bash
+      register: cert_info
+      changed_when: false
+      loop:
+        - label: "etcd CA"
+          file: "ca-etcd.pem"
+        - label: "etcd server"
+          file: "cert-etcd-server.pem"
+        - label: "Kubernetes CA"
+          file: "ca-k8s-apiserver.pem"
+        - label: "kube-apiserver"
+          file: "cert-k8s-apiserver.pem"
+        - label: "kube-controller-manager"
+          file: "cert-k8s-controller-manager.pem"
+        - label: "kube-scheduler"
+          file: "cert-k8s-scheduler.pem"
+        - label: "kube-proxy"
+          file: "cert-k8s-proxy.pem"
+        - label: "kubelet (test-worker1)"
+          file: "cert-test-worker1.pem"
+        - label: "kubelet (test-worker2)"
+          file: "cert-test-worker2.pem"
+
+    - name: Output certificate validity and SAN details
+      ansible.builtin.debug:
+        msg: "{{ item.stdout_lines }}"
+      loop: "{{ cert_info.results }}"

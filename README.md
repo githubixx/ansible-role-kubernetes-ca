@@ -4,7 +4,7 @@ This role is used in [Kubernetes the not so hard way with Ansible - Certificate 
 
 ## Versions
 
-I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `12.0.0+1.28.5` means this is release `12.0.0` of this role and it's meant to be used with Kubernetes version >= `1.28.5` (while normally it should work with basically any Kubernetes version >= 1.18.0 but I tested it with the version tagged). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase and also the role patch version will increase (e.g. from `12.0.0` to `12.0.1`). This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release.
+I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `13.0.0+1.33.0` means this is release `13.0.0` of this role and it's meant to be used with Kubernetes version >= `1.33.0` (while normally it should work with basically any Kubernetes version >= 1.18.0 but I tested it with the version tagged). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase and also the role patch version will increase (e.g. from `13.0.0` to `13.0.1`). This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release.
 
 ## Changelog
 
@@ -14,34 +14,59 @@ see [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-ca/blob/
 
 **Recent changes:**
 
+## 13.0.0+1.33.0
+
+- **POTENTIALLY BREAKING/FIX**
+
+  - Set CFSSL CA CSR `CA.expiry` so CA cert validity matches `ca_*_expiry` (fixes [#16](https://github.com/githubixx/ansible-role-kubernetes-ca/issues/16)). Previously, the role set the expiry for issued certificates via the CFSSL signing profiles, but did not explicitly set the expiry for the CA certificate created with `cfssl gencert -initca`. CFSSL then used its default CA lifetime (often ~5 years), which can result in leaf certificates that appear valid "longer" than the CA that issued them.  
+  **What this means for existing users**: Nothing breaks immediately after upgrading the role. But if your CA certificate (`ca-etcd.pem` / `ca-k8s-apiserver.pem`) was generated with the old behavior, it may expire earlier than you expect, and the whole chain becomes unusable at the CA’s expiry date even if leaf certs have later notAfter dates. This change only affects newly generated CA certificates. Existing CA files won’t be replaced automatically (the role uses creates:), so to benefit you must rotate/regenerate the CA (and any certs signed by it) or delete the existing CA artifacts so they’re recreated with the configured `ca_*_expiry`.
+  - Fix follow-up for [#16](https://github.com/githubixx/ansible-role-kubernetes-ca/issues/16): introduce `ca_etcd_root_expiry` / `ca_k8s_apiserver_root_expiry` (used for the root CA cert created via `cfssl gencert -initca`) so the root CA certificate outlives issued certificates by default. This avoids edge cases where CA and leaf certs use the same duration and the CA appears to expire slightly earlier due to issuance-time differences.
+  - Fix for [issue #14](https://github.com/githubixx/ansible-role-kubernetes-ca/issues/14): `kube-controller-manager` certificate does not contain any SANs - causing problems when scraping its metrics
+
+- **OTHER**
+
+  - increase `min_ansible_version` to `2.10` in `meta/main.yml`
+  - replace injected `ansible_*` facts usage with `ansible_facts[...]` (prepares for ansible-core 2.24 where INJECT_FACTS_AS_VARS default changes)
+  - update `.yamllint`
+  - update `.github/workflows/release.yml`
+  - update `.gitignore`
+
+- **MOLECULE**
+
+  - use Ubuntu 22.04 for some VMs
+  - replace `generic/ubuntu2004` -> `alvistack/ubuntu-24.04`
+  - replace `generic/ubuntu2004` -> `alvistack/ubuntu-24.04`
+  - remove previously generated CA/cert artifacts before running the role, so Molecule runs always test current templates/expiry behavior
+  - include `verify` in Molecule `test_sequence`
+
 ## 12.0.0+1.28.5
 
-### BREAKING
+- **BREAKING**
 
-- change default value of `k8s_controller_manager_sa_csr_cn` from `service-accounts` to `k8s-service-accounts`
-- change default value of `k8s_interface` from `tap0` to `eth0`
-- change default values of `ca_etcd_csr_cn`, `etcd_peer_csr_cn` and `etcd_client_csr_cn_prefix`
-- change default value of `k8s_apiserver_csr_cn` from `kubernetes` to `kube-apiserver`
+  - change default value of `k8s_controller_manager_sa_csr_cn` from `service-accounts` to `k8s-service-accounts`
+  - change default value of `k8s_interface` from `tap0` to `eth0`
+  - change default values of `ca_etcd_csr_cn`, `etcd_peer_csr_cn` and `etcd_client_csr_cn_prefix`
+  - change default value of `k8s_apiserver_csr_cn` from `kubernetes` to `kube-apiserver`
 
-### OTHER CHANGES
+- **OTHER**
 
-- remove tests directory
-- add `namespace` to `meta/main.yml`
-- update Github workflow
-- add important note to `k8s_apiserver_csr_cn` variable
-- `.ansible-lint`: remove `role-name`
-- remove `vars` directory
+  - remove tests directory
+  - add `namespace` to `meta/main.yml`
+  - update Github workflow
+  - add important note to `k8s_apiserver_csr_cn` variable
+  - `.ansible-lint`: remove `role-name`
+  - remove `vars` directory
 
-### MOLECULE
+- **MOLECULE**
 
-- remove `requirements.yml`
-- fix `ansible-lint` issues
-- use Ubuntu 22.04 for some VMs
-- change IPs from `192.168.10.0/24` to `172.16.10.0/24`
-- remove `etcd_cert_hosts` variable from `group_vars` (use default setting)
-- remove `role_name_check`
-- extend `verify.yml`
-- Molecule: rename role `harden-linux` to `harden_linux`
+  - remove `requirements.yml`
+  - fix `ansible-lint` issues
+  - use Ubuntu 22.04 for some VMs
+  - change IPs from `192.168.10.0/24` to `172.16.10.0/24`
+  - remove `etcd_cert_hosts` variable from `group_vars` (use default setting)
+  - remove `role_name_check`
+  - extend `verify.yml`
+  - Molecule: rename role `harden-linux` to `harden_linux`
 
 ## Requirements
 
@@ -88,8 +113,16 @@ k8s_ca_worker_nodes_group: "k8s_worker"
 # "wg0" (WireGuard), "peervpn0" (PeerVPN), "eth0", "tap0"
 k8s_interface: "eth0"
 
-# Expiry for etcd root certificate
+# Expiry for etcd certificates issued by the etcd CA signing profiles.
+# NOTE: If CA and issued certificates have exactly the same expiry duration,
+# the CA can end up expiring slightly before the issued certificates (because
+# the issued certs are generated after the CA). Use "ca_etcd_root_expiry" to
+# ensure the CA certificate outlives issued certificates.
 ca_etcd_expiry: "87600h"
+
+# Expiry for the etcd root CA certificate itself (cfssl "-initca").
+# Must be longer than "ca_etcd_expiry".
+ca_etcd_root_expiry: "87624h"
 
 # Certificate authority (CA) parameters for etcd certificates. This CA is used
 # to sign certificates used by etcd (like peer and server certificates) and
@@ -103,11 +136,20 @@ ca_etcd_csr_names_o: "Kubernetes"
 ca_etcd_csr_names_ou: "BY"
 ca_etcd_csr_names_st: "Bayern"
 
-# Expiry for Kubernetes API server root certificate
+# Expiry for certificates issued by the Kubernetes CA signing profiles.
+# NOTE: If CA and issued certificates have exactly the same expiry duration,
+# the CA can end up expiring slightly before the issued certificates (because
+# the issued certs are generated after the CA). Use
+# "ca_k8s_apiserver_root_expiry" to ensure the CA certificate outlives issued
+# certificates.
 ca_k8s_apiserver_expiry: "87600h"
 
+# Expiry for the Kubernetes root CA certificate itself (cfssl "-initca").
+# Must be longer than "ca_k8s_apiserver_expiry".
+ca_k8s_apiserver_root_expiry: "87624h"
+
 # Certificate authority (CA) parameters for Kubernetes API server. The CA is
-# used to sign certifcates for various Kubernetes services like Kubernetes API
+# used to sign certificates for various Kubernetes services like Kubernetes API
 # server e.g.
 ca_k8s_apiserver_csr_cn: "Kubernetes"
 ca_k8s_apiserver_csr_key_algo: "rsa"
@@ -284,6 +326,12 @@ k8s_apiserver_cert_hosts:
   - kubernetes.default.svc
   - kubernetes.default.svc.cluster
   - kubernetes.default.svc.cluster.local
+
+# Additional hostnames/IPs to include in the kube-controller-manager serving
+# certificate SAN list. By default, the role will include all controller node
+# hostnames and IPs (inventory name, hostname, default IPv4, and k8s_interface
+# IPv4). Use this list to add extra names (e.g. a load balancer DNS name).
+k8s_controller_manager_cert_hosts: []
 
 # This list should contain all etcd clients that wants to connect to the etcd
 # cluster. The most important client is "kube-apiserver" of course. So you
