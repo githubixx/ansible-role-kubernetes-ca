@@ -307,6 +307,12 @@ k8s_apiserver_cert_hosts:
   - kubernetes.default.svc.cluster
   - kubernetes.default.svc.cluster.local
 
+# Additional hostnames/IPs to include in the kube-controller-manager serving
+# certificate SAN list. By default, the role will include all controller node
+# hostnames and IPs (inventory name, hostname, default IPv4, and k8s_interface
+# IPv4). Use this list to add extra names (e.g. a load balancer DNS name).
+k8s_controller_manager_cert_hosts: []
+
 # This list should contain all etcd clients that wants to connect to the etcd
 # cluster. The most important client is "kube-apiserver" of course. So you
 # definitely want to keep "k8s-apiserver-etcd" in this list.
